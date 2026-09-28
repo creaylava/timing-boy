@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🌰 Empower 项目排期</title>
+<style>
+  :root{
+    --bg:#f4f5f7; --card-bg:#ffffff; --text:#2e2a26; --muted:#8c8377;
+    --accent:#c8662f; --border:#e2dbd1; --input-bg:#fdfcfa; --sidebar-bg:#ffffff;
+    --bar-bg:#e9ecef; --today-bg:#fff3cd;
+  }
+  body.dark {
+    --bg:#121212; --card-bg:#1e1e1e; --text:#e0e0e0; --muted:#9e9e9e;
+    --accent:#e07b39; --border:#444444; --input-bg:#2d2d2d; --sidebar-bg:#1e1e1e;
+    --bar-bg:#2d2d2d; --today-bg:#332b00;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    height:100vh; overflow:hidden; display:flex; flex-direction:column;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text); transition:.3s;
+  }
+  header{
+    display:flex; align-items:center; padding:10px 20px; background:var(--card-bg);
+    border-bottom:1px solid var(--border); gap:10px; z-index:10; flex-shrink:0;
+    box-shadow:0 2px 5px rgba(0,0,0,.05);
+  }
+  header h1{font-size:16px; font-weight:700; margin-right:auto;}
+  .btn{
+    border:1px solid var(--border); background:var(--card-bg); color:var(--text);
+    padding:7px 14px; border-radius:8px; font-size:13px; cursor:pointer; transition:.15s; font-family:inherit;
+    white-space:nowrap;
+  }
+  .btn:hover{background:var(--input-bg);}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .btn.primary:hover{opacity:.9;}
+  .btn.danger{color:#d0453a; border-color:#f0cfcc;}
+  .btn.icon{padding:7px 10px;}
+  .btn.small{padding:4px 8px; font-size:11px;}
+
+  .planner-container { flex:1; display:flex; overflow:hidden; position:relative; }
+  .task-sidebar {
+    width: 280px; flex-shrink: 0; background:var(--sidebar-bg);
+    border-right: 2px solid var(--border); display: flex; flex-direction: column;
+    overflow-y: auto; z-index: 5; box-shadow: 2px 0 5px rgba(0,0,0,.05);
+  }
+  .sidebar-header {
+    height: 50px; display: flex; align-items: center; padding: 0 15px;
+    font-weight: 700; font-size: 13px; border-bottom: 1px solid var(--border);
+    background: var(--card-bg); position: sticky; top: 0; z-index: 6;
+  }
+  .task-item {
+    min-height: 60px; display: flex; flex-direction: column; justify-content: center;
+    padding: 8px 15px; border-bottom: 1px solid var(--border); font-size: 13px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .task-item:hover { background: var(--input-bg); }
+  .task-item.active { background: rgba(200,102,47,.1); border-left: 4px solid var(--accent); }
+  .task-name { font-weight: 600; margin-bottom: 3px; display: flex; justify-content: space-between; }
+  .task-meta { font-size: 11px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap;}
+
+  .gantt-viewport { flex: 1; overflow: auto; position: relative; background: var(--bg); }
+  .gantt-canvas { display: flex; flex-direction: column; min-width: max-content; position: relative; }
+  
+  .timeline-header {
+    height: 50px; display: flex; border-bottom: 1px solid var(--border);
+    background: var(--card-bg); position: sticky; top: 0; z-index: 4;
+  }
+  .timeline-day {
+    width: 40px; flex-shrink: 0; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--muted); line-height: 1.2;
+  }
+  .timeline-day.weekend { background: rgba(0,0,0,.03); }
+  .timeline-day.today { background: var(--today-bg); color: var(--accent); font-weight: 700; }
+  .timeline-day .month-label { font-size: 9px; color: var(--muted); }
+
+  /* 依赖线 SVG 层 */
+  #dependencyLayer {
+    position: absolute; top: 50px; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1; overflow: visible;
+  }
+
+  .task-row {
+    height: 60px; display: flex; border-bottom: 1px solid var(--border);
+    position: relative; transition: background 0.15s; z-index: 2;
+  }
+  .task-row:hover { background: rgba(0,0,0,.02); }
+  .task-row.active { background: rgba(200,102,47,.05); }
+  
+  .grid-bg { position: absolute; inset: 0; display: flex; pointer-events: none; z-index: 0; }
+  .grid-cell { width: 40px; flex-shrink: 0; border-right: 1px solid var(--border); }
+  .grid-cell.weekend { background: rgba(0,0,0,.02); }
+  .grid-cell.today { background: var(--today-bg); }
+
+  .task-bar {
+    position: absolute; top: 8px; height: 22px; border-radius: 4px;
+    background: var(--accent); color: #fff; font-size: 11px; padding: 0 6px;
+    display: flex; align-items: center; justify-content: space-between;
+    white-space: nowrap; overflow: visible; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    cursor: pointer; transition: transform .1s; z-index: 3;
+  }
+  .task-bar.phase2 { top: 32px; height: 18px; font-size: 10px; opacity: .95; border-radius: 3px; }
+  .task-bar:hover { transform: scaleY(1.1); box-shadow: 0 3px 8px rgba(0,0,0,.3); z-index: 10; }
+  .task-bar .progress-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; background: rgba(0,0,0,.2);
+    border-radius: 4px 0 0 4px; z-index: 1;
+  }
+  .task-bar .bar-text { position: relative; z-index: 3; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+
+  /* 关键节点（里程碑）菱形 */
+  .milestone-marker {
+    position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(45deg);
+    width: 8px; height: 8px; background: #fff; border: 2px solid #333;
+    z-index: 5; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.3);
+    transition: transform 0.2s;
+  }
+  .milestone-marker:hover { transform: translate(-50%, -50%) rotate(45deg) scale(1.4); z-index: 20; }
+  .milestone-marker::after {
+    content: attr(data-name); position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,.85); color: #fff; padding: 3px 6px; border-radius: 4px;
+    font-size: 10px; white-space: nowrap; display: none; pointer-events: none;
+    font-family: sans-serif; font-style: normal; z-index: 100;
+  }
+  .milestone-marker:hover::after { display: block; }
+
+  .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--card-bg); border-radius:14px; width:100%; max-width:520px;
+    padding:20px; box-shadow:0 20px 60px rgba(0,0,0,.25); max-height:90vh; overflow-y:auto;
+    animation:pop .16s ease-out;
+  }
+  @keyframes pop{from{transform:translateY(8px); opacity:0;} to{transform:none; opacity:1;}}
+  .m-title{font-size:17px; font-weight:600; margin-bottom:15px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; color:var(--muted); margin-bottom:5px;}
+  .modal input, .modal select, .modal textarea {
+    width:100%; border:1px solid var(--border); border-radius:8px;
+    padding:8px 10px; font-size:14px; font-family:inherit; color:var(--text);
+    background:var(--input-bg); outline:none;
+  }
+  .modal input:focus, .modal select:focus { border-color:var(--accent); background:var(--card-bg); }
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .modal-actions{display:flex; gap:8px; margin-top:15px; align-items:center;}
+
+  .milestone-list { border: 1px solid var(--border); border-radius: 8px; padding: 8px; background: var(--input-bg); max-height: 120px; overflow-y: auto; margin-bottom: 5px; }
+  .milestone-item { display: flex; gap: 5px; margin-bottom: 6px; align-items: center; }
+  .milestone-item input[type="text"] { flex: 1; padding: 4px 6px; font-size: 12px; }
+  .milestone-item input[type="date"] { width: 105px; padding: 4px 6px; font-size: 12px; }
+  .milestone-item .remove-ms { color: #d0453a; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; }
+
+  @media (max-width: 768px) {
+    .task-sidebar { width: 160px; }
+    .task-name { font-size: 12px; }
+    .timeline-day { width: 30px; font-size: 9px; }
+    .grid-cell { width: 30px; }
+    .task-bar { font-size: 10px; padding: 0 4px; }
+    .task-bar.phase2 { font-size: 9px; }
+    .milestone-marker { width: 6px; height: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌰 Empower 项目排期</h1>
+  <button class="btn primary" id="addTaskBtn">＋ 新建任务</button>
+  <button class="btn" id="exportBtn">导出Excel</button>
+  <button class="btn icon" id="themeToggle" title="切换深色/浅色">🌙</button>
+  <button class="btn danger" id="resetBtn">重置</button>
+</header>
+
+<div class="planner-container">
+  <div class="task-sidebar" id="taskSidebar">
+    <div class="sidebar-header">任务列表</div>
+  </div>
+  <div class="gantt-viewport" id="ganttViewport">
+    <div class="gantt-canvas" id="ganttCanvas">
+      <div class="timeline-header" id="timelineHeader"></div>
+      <svg id="dependencyLayer"></svg> <!-- 依赖线层 -->
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="m-title" id="modalTitle">新建任务</div>
+    <div class="field">
+      <label>任务名称</label>
+      <input id="mName" placeholder="如：方案设计、图纸审核">
+    </div>
+    
+    <div class="grid2">
+      <div class="field">
+        <label>阶段1 开始</label>
+        <input type="date" id="mStart">
+      </div>
+      <div class="field">
+        <label>阶段1 结束</label>
+        <input type="date" id="mEnd">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label>阶段2 开始（选填）</label>
+        <input type="date" id="mStart2">
+      </div>
+      <div class="field">
+        <label>阶段2 结束（选填）</label>
+        <input type="date" id="mEnd2">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label>负责人</label>
+        <input id="mOwner" placeholder="如：张三">
+      </div>
+      <div class="field">
+        <label>进度 (%)</label>
+        <input type="number" id="mProgress" min="0" max="100" value="0">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>前置任务（依赖关系）</label>
+      <select id="mDependency">
+        <option value="">无依赖</option>
+        <!-- 动态插入其他任务 -->
+      </select>
+    </div>
+
+    <div class="field">
+      <label>颜色标记</label>
+      <select id="mColor">
+        <option value="#c8662f">默认（橙色）</option>
+        <option value="#3f9d7c">进行中（绿色）</option>
+        <option value="#e8a33d">待办（黄色）</option>
+        <option value="#e2574c">紧急（红色）</option>
+        <option value="#6c5ce7">设计（紫色）</option>
+        <option value="#0984e3">采购（蓝色）</option>
+      </select>
+    </div>
+    
+    <div class="field">
+      <label>关键节点（里程碑）</label>
+      <div class="milestone-list" id="milestoneList"></div>
+      <button type="button" class="btn small" id="addMilestoneBtn">＋ 添加节点</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn danger" id="mDelete">删除</button>
+      <div style="flex:1"></div>
+      <button class="btn" id="mCancel">取消</button>
+      <button class="btn primary" id="mSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'empower-plan-v1';
+const THEME_KEY = 'empower-plan-theme';
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+function defaultData() {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), 1);
+  return {
+    projectStart: start.toISOString().slice(0, 10),
+    projectEnd: new Date(today.getFullYear(), today.getMonth() + 2, 0).toISOString().slice(0, 10),
+    tasks: [
+      { 
+        id: uid(), name: '概念设计', 
+        start: start.toISOString().slice(0,10), 
+        end: new Date(today.getFullYear(), today.getMonth(), 10).toISOString().slice(0,10), 
+        start2: '', end2: '',
+        progress: 100, owner: '张三', color: '#6c5ce7', dependencyId: '',
+        milestones: [{ name: '方案评审', date: new Date(today.getFullYear(), today.getMonth(), 8).toISOString().slice(0,10) }]
+      },
+      { 
+        id: uid(), name: '详细设计', 
+        start: new Date(today.getFullYear(), today.getMonth(), 12).toISOString().slice(0,10), 
+        end: new Date(today.getFullYear(), today.getMonth(), 25).toISOString().slice(0,10), 
+        start2: new Date(today.getFullYear(), today.getMonth(), 26).toISOString().slice(0,10),
+        end2: new Date(today.getFullYear(), today.getMonth()+1, 5).toISOString().slice(0,10),
+        progress: 60, owner: '李四', color: '#0984e3', dependencyId: '', // 稍后通过UI设置
+        milestones: [{ name: '图纸下发', date: new Date(today.getFullYear(), today.getMonth(), 22).toISOString().slice(0,10) }]
+      },
+      { 
+        id: uid(), name: '零件采购', 
+        start: new Date(today.getFullYear(), today.getMonth(), 20).toISOString().slice(0,10), 
+        end: new Date(today.getFullYear(), today.getMonth()+1, 10).toISOString().slice(0,10), 
+        start2: '', end2: '',
+        progress: 20, owner: '王五', color: '#e8a33d', dependencyId: '',
+        milestones: []
+      }
+    ]
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { const d = JSON.parse(raw); if (d && d.tasks) return d; }
+  } catch (e) {}
+  return defaultData();
+}
+function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { alert('存储空间不足！'); } }
+
+let state = loadState();
+let editingId = null;
+
+const themeBtn = document.getElementById('themeToggle');
+function applyTheme(theme) {
+  if (theme === 'dark') { document.body.classList.add('dark'); themeBtn.textContent = '☀️'; }
+  else { document.body.classList.remove('dark'); themeBtn.textContent = '🌙'; }
+}
+const savedTheme = localStorage.getItem(THEME_KEY);
+if (savedTheme) { applyTheme(savedTheme); } else {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(prefersDark ? 'dark' : 'light');
+}
+themeBtn.onclick = () => {
+  const isDark = document.body.classList.contains('dark');
+  const t = isDark ? 'light' : 'dark';
+  applyTheme(t); localStorage.setItem(THEME_KEY, t);
+};
+
+function getDaysBetween(d1, d2) { return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)); }
+function formatDate(date) {
+  const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function render() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  let minDate = new Date(state.projectStart);
+  let maxDate = new Date(state.projectEnd);
+  if (today < minDate) minDate = new Date(today);
+  if (today > maxDate) maxDate = new Date(today);
+  minDate.setDate(minDate.getDate() - 3);
+  maxDate.setDate(maxDate.getDate() + 7);
+  
+  const totalDays = getDaysBetween(minDate, maxDate);
+  const cellWidth = window.innerWidth <= 768 ? 30 : 40;
+
+  // 1. 左侧任务列表
+  const sidebar = document.getElementById('taskSidebar');
+  let sidebarHTML = '<div class="sidebar-header">任务列表</div>';
+  state.tasks.forEach((task) => {
+    const start = new Date(task.start); const end = new Date(task.end);
+    const days = getDaysBetween(start, end) + 1;
+    const msCount = (task.milestones || []).length;
+    sidebarHTML += `
+      <div class="task-item" data-id="${task.id}" style="border-left: 4px solid ${task.color}">
+        <div class="task-name">${task.name} <span style="font-weight:400; font-size:11px; color:var(--muted)">${task.progress}%</span></div>
+        <div class="task-meta">
+          <span>${task.owner || '未分配'}</span>
+          <span>${formatDate(start).slice(5)} ~ ${formatDate(end).slice(5)} (${days}天)</span>
+          ${msCount > 0 ? `<span style="color:var(--accent)">◆ ${msCount}个节点</span>` : ''}
+        </div>
+      </div>
+    `;
+  });
+  sidebar.innerHTML = sidebarHTML;
+
+  // 2. 时间轴
+  const header = document.getElementById('timelineHeader');
+  let headerHTML = '';
+  for (let i = 0; i < totalDays; i++) {
+    const d = new Date(minDate); d.setDate(d.getDate() + i);
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+    const isToday = d.toDateString() === new Date().toDateString();
+    const monthLabel = d.getDate() === 1 ? `${d.getMonth()+1}月` : '';
+    headerHTML += `
+      <div class="timeline-day ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}">
+        <div>${d.getDate()}</div>
+        <div class="month-label">${monthLabel}</div>
+      </div>
+    `;
+  }
+  header.innerHTML = headerHTML;
+
+  // 清除旧行和旧线
+  document.querySelectorAll('.task-row').forEach(r => r.remove());
+  const svgLayer = document.getElementById('dependencyLayer');
+  svgLayer.innerHTML = '';
+  
+  const canvas = document.getElementById('ganttCanvas');
+  const rowHeight = 60;
+  const rowYMap = {}; // 记录每个任务行的 Y 坐标中心
+  const taskGeometry = {}; // 记录任务条的几何信息
+
+  state.tasks.forEach((task, index) => {
+    const row = document.createElement('div');
+    row.className = 'task-row';
+    row.dataset.id = task.id;
+    row.style.height = rowHeight + 'px';
+    
+    let bgHTML = '<div class="grid-bg">';
+    for (let i = 0; i < totalDays; i++) {
+      const d = new Date(minDate); d.setDate(d.getDate() + i);
+      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+      const isToday = d.toDateString() === new Date().toDateString();
+      bgHTML += `<div class="grid-cell ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}"></div>`;
+    }
+    bgHTML += '</div>';
+    row.innerHTML = bgHTML;
+
+    // 记录行中心 Y (用于画线)
+    rowYMap[task.id] = 50 + index * rowHeight + rowHeight / 2;
+
+    // 计算阶段1
+    const taskStart = new Date(task.start); const taskEnd = new Date(task.end);
+    const offsetDays = getDaysBetween(minDate, taskStart);
+    const durationDays = getDaysBetween(taskStart, taskEnd) + 1;
+    const visibleOffset = Math.max(0, offsetDays);
+    const visibleDuration = Math.min(durationDays - (visibleOffset - offsetDays), totalDays - visibleOffset);
+
+    let phase1RightX = 0;
+
+    if (visibleDuration > 0) {
+      const bar = document.createElement('div');
+      bar.className = 'task-bar phase1';
+      bar.style.left = `${visibleOffset * cellWidth}px`;
+      bar.style.width = `${visibleDuration * cellWidth}px`;
+      bar.style.background = task.color;
+      
+      bar.innerHTML = `
+        <div class="progress-fill" style="width: ${task.progress}%; background: rgba(0,0,0,0.25);"></div>
+        <span class="bar-text">${task.name}</span>
+        <span class="bar-text" style="font-size:10px; opacity:.8">${task.progress}%</span>
+      `;
+      phase1RightX = (visibleOffset + visibleDuration) * cellWidth;
+
+      if (task.milestones && task.milestones.length > 0) {
+        task.milestones.forEach(ms => {
+          const msDate = new Date(ms.date);
+          const msOffsetDays = getDaysBetween(taskStart, msDate);
+          if (msOffsetDays >= 0 && msOffsetDays <= durationDays) {
+            const marker = document.createElement('div');
+            marker.className = 'milestone-marker';
+            marker.setAttribute('data-name', `${ms.name} (${ms.date.slice(5)})`);
+            marker.style.left = `${(msOffsetDays / durationDays) * 100}%`;
+            marker.style.borderColor = task.color;
+            bar.appendChild(marker);
+          }
+        });
+      }
+      row.appendChild(bar);
+    }
+
+    // 计算阶段2（如果有）
+    let phase2RightX = 0;
+    if (task.start2 && task.end2) {
+      const t2Start = new Date(task.start2); const t2End = new Date(task.end2);
+      const o2Days = getDaysBetween(minDate, t2Start);
+      const d2Days = getDaysBetween(t2Start, t2End) + 1;
+      const v2Offset = Math.max(0, o2Days);
+      const v2Duration = Math.min(d2Days - (v2Offset - o2Days), totalDays - v2Offset);
+
+      if (v2Duration > 0) {
+        const bar2 = document.createElement('div');
+        bar2.className = 'task-bar phase2';
+        bar2.style.left = `${v2Offset * cellWidth}px`;
+        bar2.style.width = `${v2Duration * cellWidth}px`;
+        // 阶段2颜色稍浅
+        bar2.style.background = task.color + 'cc'; 
+        bar2.innerHTML = `<span class="bar-text">阶段2</span>`;
+        phase2RightX = (v2Offset + v2Duration) * cellWidth;
+        row.appendChild(bar2);
+      }
+    }
+
+    // 记录任务几何信息，用于画依赖线
+    taskGeometry[task.id] = {
+      startX: offsetDays * cellWidth,
+      phase1EndX: phase1RightX,
+      phase2EndX: phase2RightX,
+      yCenter: 50 + index * rowHeight + rowHeight / 2
+    };
+    
+    row.addEventListener('click', () => openEdit(task.id));
+    canvas.appendChild(row);
+  });
+
+  // 3. 绘制依赖线 (SVG)
+  state.tasks.forEach(task => {
+    if (!task.dependencyId) return;
+    const preId = task.dependencyId;
+    const preGeo = taskGeometry[preId];
+    const curGeo = taskGeometry[task.id];
+    if (!preGeo || !curGeo) return;
+
+    // 确定起点：优先从阶段2的末尾出发，没有阶段2就从阶段1末尾出发
+    let startX = preGeo.phase2EndX > 0 ? preGeo.phase2EndX : preGeo.phase1EndX;
+    if (startX === 0) return; // 前置任务不可见
+
+    const startY = preGeo.yCenter;
+    const endX = curGeo.startX;
+    const endY = curGeo.yCenter;
+
+    // 绘制直角折线 (L型)
+    // 逻辑：从起点向右延伸 10px -> 垂直移动 -> 指向终点
+    const midX = startX + 10;
+    const pathD = `M ${startX} ${startY} H ${midX} V ${endY} H ${endX - 5}`;
+    
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathD);
+    path.setAttribute('stroke', 'var(--muted)');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke-dasharray', '4,2'); // 虚线表示依赖
+    svgLayer.appendChild(path);
+
+    // 画箭头
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    arrow.setAttribute('points', `${endX-5},${endY-4} ${endX},${endY} ${endX-5},${endY+4}`);
+    arrow.setAttribute('fill', 'var(--muted)');
+    svgLayer.appendChild(arrow);
+  });
+
+  // 同步高亮
+  document.querySelectorAll('.task-item').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.task-item').forEach(e => e.classList.remove('active'));
+      document.querySelectorAll('.task-row').forEach(e => e.classList.remove('active'));
+      el.classList.add('active');
+      const row = document.querySelector(`.task-row[data-id="${el.dataset.id}"]`);
+      if (row) row.classList.add('active');
+    });
+  });
+}
+
+const overlay = document.getElementById('overlay');
+const mName = document.getElementById('mName');
+const mStart = document.getElementById('mStart');
+const mEnd = document.getElementById('mEnd');
+const mStart2 = document.getElementById('mStart2');
+const mEnd2 = document.getElementById('mEnd2');
+const mOwner = document.getElementById('mOwner');
+const mProgress = document.getElementById('mProgress');
+const mColor = document.getElementById('mColor');
+const mDependency = document.getElementById('mDependency');
+const milestoneList = document.getElementById('milestoneList');
+
+function renderMilestones(milestones) {
+  milestoneList.innerHTML = '';
+  milestones.forEach((ms, index) => {
+    const div = document.createElement('div');
+    div.className = 'milestone-item';
+    div.innerHTML = `
+      <input type="text" placeholder="节点名称" value="${ms.name || ''}" data-index="${index}" class="ms-name">
+      <input type="date" value="${ms.date || ''}" data-index="${index}" class="ms-date">
+      <button type="button" class="remove-ms" data-index="${index}">✕</button>
+    `;
+    milestoneList.appendChild(div);
+  });
+}
+function collectMilestones() {
+  const items = milestoneList.querySelectorAll('.milestone-item');
+  const msArray = [];
+  items.forEach(item => {
+    const name = item.querySelector('.ms-name').value.trim();
+    const date = item.querySelector('.ms-date').value;
+    if (name && date) msArray.push({ name, date });
+  });
+  return msArray;
+}
+milestoneList.addEventListener('click', (e) => {
+  if (e.target.classList.contains('remove-ms')) {
+    const index = parseInt(e.target.dataset.index);
+    const current = collectMilestones();
+    current.splice(index, 1);
+    renderMilestones(current);
+  }
+});
+document.getElementById('addMilestoneBtn').onclick = () => {
+  const current = collectMilestones();
+  current.push({ name: '', date: formatDate(new Date()) });
+  renderMilestones(current);
+};
+
+function openModal(title, task = null) {
+  document.getElementById('modalTitle').textContent = title;
+  
+  // 填充前置任务下拉框
+  let depOptions = '<option value="">无依赖</option>';
+  state.tasks.forEach(t => {
+    if (task && t.id === task.id) return; // 不能依赖自己
+    depOptions += `<option value="${t.id}">${t.name}</option>`;
+  });
+  mDependency.innerHTML = depOptions;
+
+  if (task) {
+    editingId = task.id;
+    mName.value = task.name;
+    mStart.value = task.start;
+    mEnd.value = task.end;
+    mStart2.value = task.start2 || '';
+    mEnd2.value = task.end2 || '';
+    mOwner.value = task.owner || '';
+    mProgress.value = task.progress || 0;
+    mColor.value = task.color || '#c8662f';
+    mDependency.value = task.dependencyId || '';
+    renderMilestones(task.milestones || []);
+  } else {
+    editingId = null;
+    const today = new Date();
+    const nextWeek = new Date(today); nextWeek.setDate(today.getDate() + 6);
+    mName.value = '';
+    mStart.value = formatDate(today);
+    mEnd.value = formatDate(nextWeek);
+    mStart2.value = ''; mEnd2.value = '';
+    mOwner.value = ''; mProgress.value = 0;
+    mColor.value = '#c8662f'; mDependency.value = '';
+    renderMilestones([]);
+  }
+  overlay.classList.add('show');
+  setTimeout(() => mName.focus(), 30);
+}
+
+function closeModal() { overlay.classList.remove('show'); editingId = null; }
+
+document.getElementById('addTaskBtn').onclick = () => openModal('新建任务');
+document.getElementById('mCancel').onclick = closeModal;
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+document.getElementById('mSave').onclick = () => {
+  const name = mName.value.trim();
+  if (!name) { alert('请输入任务名称'); return; }
+  if (mStart.value > mEnd.value) { alert('阶段1：开始日期不能晚于结束日期'); return; }
+  if (mStart2.value && mEnd2.value && mStart2.value > mEnd2.value) { alert('阶段2：开始日期不能晚于结束日期'); return; }
+
+  const milestones = collectMilestones();
+
+  const taskData = {
+    name, start: mStart.value, end: mEnd.value,
+    start2: mStart2.value, end2: mEnd2.value,
+    owner: mOwner.value.trim(), progress: parseInt(mProgress.value) || 0,
+    color: mColor.value, dependencyId: mDependency.value, milestones: milestones
+  };
+
+  if (editingId) {
+    const task = state.tasks.find(t => t.id === editingId);
+    if (task) Object.assign(task, taskData);
+  } else {
+    state.tasks.push({ id: uid(), ...taskData });
+  }
+  closeModal(); render(); saveState();
+};
+
+document.getElementById('mDelete').onclick = () => {
+  if (!editingId) { closeModal(); return; }
+  if (!confirm('确定删除这个任务吗？')) return;
+  state.tasks = state.tasks.filter(t => t.id !== editingId);
+  // 同时清理其他任务对它的依赖
+  state.tasks.forEach(t => { if (t.dependencyId === editingId) t.dependencyId = ''; });
+  closeModal(); render(); saveState();
+};
+
+function openEdit(id) {
+  const task = state.tasks.find(t => t.id === id);
+  if (task) openModal('编辑任务', task);
+}
+
+document.getElementById('exportBtn').onclick = () => {
+  let csvContent = "\uFEFF任务名称,阶段1开始,阶段1结束,阶段2开始,阶段2结束,负责人,进度,颜色,前置任务,关键节点\n";
+  state.tasks.forEach(t => {
+    const preName = state.tasks.find(x => x.id === t.dependencyId)?.name || '无';
+    const msText = (t.milestones || []).map(m => `${m.name}(${m.date})`).join('; ');
+    csvContent += [`"${t.name}"`, `"${t.start}"`, `"${t.end}"`, `"${t.start2}"`, `"${t.end2}"`, `"${t.owner}"`, `"${t.progress}%"`, `"${t.color}"`, `"${preName}"`, `"${msText}"`].join(",") + "\n";
+  });
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'Empower项目排期.csv'; link.click(); URL.revokeObjectURL(link.href);
+};
+
+document.getElementById('resetBtn').onclick = () => {
+  if (!confirm('确定清空所有数据并恢复示例吗？')) return;
+  state = defaultData(); render(); saveState();
+};
+
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 200); });
+
+render();
+</script>
+</body>
+</html>
