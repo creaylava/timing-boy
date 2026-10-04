@@ -56,6 +56,7 @@
     font-weight: 700; font-size: 13px; border-bottom: 1px solid var(--border);
     background: var(--card-bg); position: sticky; top: 0; z-index: 6;
   }
+  /* 任务行左侧 */
   .task-item {
     min-height: 60px; display: flex; align-items: center; justify-content: space-between;
     padding: 8px 10px 8px 15px; border-bottom: 1px solid var(--border); font-size: 13px;
@@ -66,11 +67,7 @@
   .task-info { flex: 1; min-width: 0; }
   .task-name { font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .task-owner { font-size: 11px; color: var(--muted); }
-
-  /* 上下移动按钮 */
-  .task-move-btns {
-    display: flex; flex-direction: column; gap: 2px; margin-left: 6px;
-  }
+  .task-move-btns { display: flex; flex-direction: column; gap: 2px; margin-left: 6px; }
   .move-btn {
     background: rgba(100,100,100,.08); color: var(--muted); border: none;
     width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
@@ -79,6 +76,19 @@
   }
   .move-btn:hover:not(:disabled) { background: var(--accent); color: #fff; }
   .move-btn:disabled { opacity: 0.3; cursor: not-allowed; background: transparent; }
+
+  /* 节点行左侧 */
+  .milestone-item-row {
+    min-height: 40px; display: flex; align-items: center;
+    padding: 5px 15px 5px 30px; border-bottom: 1px solid var(--border);
+    font-size: 12px; cursor: pointer; transition: background 0.15s;
+    background: var(--sub-bg);
+  }
+  .milestone-item-row:hover { background: var(--input-bg); }
+  .milestone-item-row.active { background: rgba(200,102,47,.1); border-left: 4px solid var(--accent); }
+  .milestone-info { flex: 1; min-width: 0; }
+  .milestone-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .milestone-date { font-size: 10px; color: var(--muted); }
 
   .gantt-viewport { flex: 1; overflow: auto; position: relative; background: var(--bg); }
   .gantt-canvas { display: flex; flex-direction: column; min-width: max-content; position: relative; }
@@ -107,6 +117,15 @@
   }
   .task-row:hover { background: rgba(0,0,0,.02); }
   .task-row.active { background: rgba(200,102,47,.05); }
+
+  /* 节点行右侧 */
+  .milestone-row {
+    height: 40px; display: flex; border-bottom: 1px solid var(--border);
+    position: relative; transition: background 0.15s; z-index: 2;
+    background: var(--sub-bg);
+  }
+  .milestone-row:hover { background: var(--input-bg); }
+  .milestone-row.active { background: rgba(200,102,47,.05); }
   
   .grid-bg { position: absolute; inset: 0; display: flex; pointer-events: none; z-index: 0; }
   .grid-cell { width: 40px; flex-shrink: 0; border-right: 1px solid var(--border); }
@@ -114,7 +133,7 @@
   .grid-cell.today { background: var(--today-bg); }
 
   .task-bar {
-    position: absolute; top: 6px; height: 22px; border-radius: 4px;
+    position: absolute; top: 8px; height: 22px; border-radius: 4px;
     background: var(--accent); color: #fff; font-size: 11px; padding: 0 6px;
     display: flex; align-items: center; justify-content: space-between;
     white-space: nowrap; overflow: visible; box-shadow: 0 1px 3px rgba(0,0,0,.2);
@@ -130,7 +149,7 @@
 
   /* 独立节点样式 */
   .milestone-marker {
-    position: absolute; transform: translate(-50%, -50%) rotate(45deg);
+    position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(45deg);
     width: 10px; height: 10px; background: #fff; border: 2px solid #333;
     z-index: 5; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.3);
     transition: transform 0.2s;
@@ -173,6 +192,8 @@
     .task-sidebar { width: 180px; }
     .task-name { font-size: 12px; }
     .task-owner { font-size: 10px; }
+    .milestone-name { font-size: 11px; }
+    .milestone-date { font-size: 9px; }
     .timeline-day { width: 30px; font-size: 9px; }
     .grid-cell { width: 30px; }
     .task-bar { font-size: 10px; padding: 0 4px; }
@@ -372,7 +393,7 @@ themeBtn.onclick = () => {
 };
 
 /* =========================================================
-   核心渲染逻辑
+   核心渲染逻辑（节点独立成行）
    ========================================================= */
 function getDaysBetween(d1, d2) { return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)); }
 function formatDate(date) {
@@ -386,7 +407,7 @@ function render() {
   if (!currentProj) {
     document.getElementById('taskSidebar').innerHTML = '<div class="sidebar-header">任务列表</div><div style="padding:20px;font-size:12px;color:#888;">请先点击上方“＋ 项目”</div>';
     document.getElementById('timelineHeader').innerHTML = '';
-    document.querySelectorAll('.task-row').forEach(r => r.remove());
+    document.querySelectorAll('.task-row, .milestone-row').forEach(r => r.remove());
     return;
   }
 
@@ -413,24 +434,52 @@ function render() {
   const totalDays = getDaysBetween(minDate, maxDate);
   const cellWidth = window.innerWidth <= 768 ? 30 : 40;
 
-  // 1. 左侧任务列表（支持上下移动）
+  // 构建行数据结构：任务行 + 节点行
+  const renderRows = [];
+  currentProj.tasks.forEach(task => {
+    renderRows.push({ type: 'task', task: task, id: task.id });
+    if (task.milestones && task.milestones.length > 0) {
+      task.milestones.forEach(ms => {
+        renderRows.push({ type: 'milestone', task: task, ms: ms, id: 'ms-' + task.id + '-' + ms.name + '-' + ms.date });
+      });
+    }
+  });
+
+  // 1. 左侧列表
   const sidebar = document.getElementById('taskSidebar');
   let sidebarHTML = '<div class="sidebar-header">任务列表</div>';
-  currentProj.tasks.forEach((task, index) => {
-    const isFirst = index === 0;
-    const isLast = index === currentProj.tasks.length - 1;
-    sidebarHTML += `
-      <div class="task-item" data-id="${task.id}" style="border-left: 4px solid ${task.color}">
-        <div class="task-info">
-          <div class="task-name">${esc(task.name)}</div>
-          <div class="task-owner">${esc(task.owner || '未分配')}</div>
+  renderRows.forEach((row, index) => {
+    if (row.type === 'task') {
+      const task = row.task;
+      const isFirst = index === 0 || renderRows[index - 1].type !== 'task';
+      // 找到上一个任务在当前列表中的索引，判断是否可以上移
+      const taskIndex = currentProj.tasks.findIndex(t => t.id === task.id);
+      const isFirstTask = taskIndex === 0;
+      const isLastTask = taskIndex === currentProj.tasks.length - 1;
+      
+      sidebarHTML += `
+        <div class="task-item" data-id="${task.id}" style="border-left: 4px solid ${task.color}">
+          <div class="task-info">
+            <div class="task-name">${esc(task.name)}</div>
+            <div class="task-owner">${esc(task.owner || '未分配')}</div>
+          </div>
+          <div class="task-move-btns">
+            <button class="move-btn" data-act="move-task-up" data-id="${task.id}" ${isFirstTask ? 'disabled' : ''} title="上移">↑</button>
+            <button class="move-btn" data-act="move-task-down" data-id="${task.id}" ${isLastTask ? 'disabled' : ''} title="下移">↓</button>
+          </div>
         </div>
-        <div class="task-move-btns">
-          <button class="move-btn" data-act="move-task-up" data-id="${task.id}" ${isFirst ? 'disabled' : ''} title="上移">↑</button>
-          <button class="move-btn" data-act="move-task-down" data-id="${task.id}" ${isLast ? 'disabled' : ''} title="下移">↓</button>
+      `;
+    } else {
+      const ms = row.ms;
+      sidebarHTML += `
+        <div class="milestone-item-row" data-id="${row.id}" data-task-id="${row.task.id}">
+          <div class="milestone-info">
+            <div class="milestone-name">└─ ${esc(ms.name)}</div>
+            <div class="milestone-date">${esc(ms.date)}</div>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
   });
   sidebar.innerHTML = sidebarHTML;
 
@@ -451,101 +500,125 @@ function render() {
   }
   header.innerHTML = headerHTML;
 
-  document.querySelectorAll('.task-row').forEach(r => r.remove());
+  document.querySelectorAll('.task-row, .milestone-row').forEach(r => r.remove());
   const svgLayer = document.getElementById('dependencyLayer');
   svgLayer.innerHTML = '';
   const canvas = document.getElementById('ganttCanvas');
-  const rowHeight = 60;
-  const taskGeometry = {};
+  
+  const taskGeometry = {}; // 记录任务行的Y坐标
+  let currentY = 50; // 从时间轴下方开始
 
-  currentProj.tasks.forEach((task, index) => {
-    const row = document.createElement('div');
-    row.className = 'task-row'; row.dataset.id = task.id; row.style.height = rowHeight + 'px';
-    
-    let bgHTML = '<div class="grid-bg">';
-    for (let i = 0; i < totalDays; i++) {
-      const d = new Date(minDate); d.setDate(d.getDate() + i);
-      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-      const isToday = d.toDateString() === new Date().toDateString();
-      bgHTML += `<div class="grid-cell ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}"></div>`;
-    }
-    bgHTML += '</div>';
-    row.innerHTML = bgHTML;
-
-    // 任务条
-    const taskStart = new Date(task.start); const taskEnd = new Date(task.end);
-    const offsetDays = getDaysBetween(minDate, taskStart);
-    const durationDays = getDaysBetween(taskStart, taskEnd) + 1;
-    const visibleOffset = Math.max(0, offsetDays);
-    const visibleDuration = Math.min(durationDays - (visibleOffset - offsetDays), totalDays - visibleOffset);
-
-    let phase1RightX = 0;
-    if (visibleDuration > 0) {
-      const bar = document.createElement('div');
-      bar.className = 'task-bar phase1';
-      bar.style.left = `${visibleOffset * cellWidth}px`;
-      bar.style.width = `${visibleDuration * cellWidth}px`;
-      bar.style.background = task.color;
-      bar.innerHTML = `
-        <div class="progress-fill" style="width: ${task.progress}%; background: rgba(0,0,0,0.25);"></div>
-        <span class="bar-text">${esc(task.name)}</span>
-        <span class="bar-text" style="font-size:10px; opacity:.8">${task.progress}%</span>
-      `;
-      phase1RightX = (visibleOffset + visibleDuration) * cellWidth;
-      row.appendChild(bar);
-    }
-
-    // 阶段2任务条
-    let phase2RightX = 0;
-    if (task.start2 && task.end2) {
-      const t2Start = new Date(task.start2); const t2End = new Date(task.end2);
-      const o2Days = getDaysBetween(minDate, t2Start);
-      const d2Days = getDaysBetween(t2Start, t2End) + 1;
-      const v2Offset = Math.max(0, o2Days);
-      const v2Duration = Math.min(d2Days - (v2Offset - o2Days), totalDays - v2Offset);
-      if (v2Duration > 0) {
-        const bar2 = document.createElement('div');
-        bar2.className = 'task-bar phase2';
-        bar2.style.left = `${v2Offset * cellWidth}px`;
-        bar2.style.width = `${v2Duration * cellWidth}px`;
-        bar2.style.background = task.color + 'cc';
-        bar2.innerHTML = `<span class="bar-text">阶段2</span>`;
-        phase2RightX = (v2Offset + v2Duration) * cellWidth;
-        row.appendChild(bar2);
+  renderRows.forEach((row, index) => {
+    if (row.type === 'task') {
+      const task = row.task;
+      const rowEl = document.createElement('div');
+      rowEl.className = 'task-row'; rowEl.dataset.id = task.id;
+      const rowHeight = 60;
+      rowEl.style.height = rowHeight + 'px';
+      rowEl.style.top = currentY + 'px'; // 使用绝对定位
+      
+      let bgHTML = '<div class="grid-bg">';
+      for (let i = 0; i < totalDays; i++) {
+        const d = new Date(minDate); d.setDate(d.getDate() + i);
+        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+        const isToday = d.toDateString() === new Date().toDateString();
+        bgHTML += `<div class="grid-cell ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}"></div>`;
       }
-    }
+      bgHTML += '</div>';
+      rowEl.innerHTML = bgHTML;
 
-    // 🌟 核心修改：节点独立渲染，不再依赖任务条的宽度
-    if (task.milestones && task.milestones.length > 0) {
-      task.milestones.forEach(ms => {
-        const msDate = new Date(ms.date);
-        const msOffsetDays = getDaysBetween(minDate, msDate);
-        // 只要节点在可见的时间范围内，就渲染
-        if (msOffsetDays >= 0 && msOffsetDays <= totalDays) {
-          const marker = document.createElement('div');
-          marker.className = 'milestone-marker';
-          marker.setAttribute('data-name', `${ms.name} (${ms.date.slice(5)})`);
-          // 直接根据天数差计算绝对位置
-          marker.style.left = `${msOffsetDays * cellWidth}px`;
-          marker.style.borderColor = task.color;
-          // 垂直定位：放在行的中央，或者避开任务条放在下方
-          // 这里我们放在行的中央偏下一点
-          marker.style.top = '45px'; 
-          row.appendChild(marker);
+      // 任务条
+      const taskStart = new Date(task.start); const taskEnd = new Date(task.end);
+      const offsetDays = getDaysBetween(minDate, taskStart);
+      const durationDays = getDaysBetween(taskStart, taskEnd) + 1;
+      const visibleOffset = Math.max(0, offsetDays);
+      const visibleDuration = Math.min(durationDays - (visibleOffset - offsetDays), totalDays - visibleOffset);
+
+      let phase1RightX = 0;
+      if (visibleDuration > 0) {
+        const bar = document.createElement('div');
+        bar.className = 'task-bar phase1';
+        bar.style.left = `${visibleOffset * cellWidth}px`;
+        bar.style.width = `${visibleDuration * cellWidth}px`;
+        bar.style.background = task.color;
+        bar.innerHTML = `
+          <div class="progress-fill" style="width: ${task.progress}%; background: rgba(0,0,0,0.25);"></div>
+          <span class="bar-text">${esc(task.name)}</span>
+          <span class="bar-text" style="font-size:10px; opacity:.8">${task.progress}%</span>
+        `;
+        phase1RightX = (visibleOffset + visibleDuration) * cellWidth;
+        rowEl.appendChild(bar);
+      }
+
+      let phase2RightX = 0;
+      if (task.start2 && task.end2) {
+        const t2Start = new Date(task.start2); const t2End = new Date(task.end2);
+        const o2Days = getDaysBetween(minDate, t2Start);
+        const d2Days = getDaysBetween(t2Start, t2End) + 1;
+        const v2Offset = Math.max(0, o2Days);
+        const v2Duration = Math.min(d2Days - (v2Offset - o2Days), totalDays - v2Offset);
+        if (v2Duration > 0) {
+          const bar2 = document.createElement('div');
+          bar2.className = 'task-bar phase2';
+          bar2.style.left = `${v2Offset * cellWidth}px`;
+          bar2.style.width = `${v2Duration * cellWidth}px`;
+          bar2.style.background = task.color + 'cc';
+          bar2.innerHTML = `<span class="bar-text">阶段2</span>`;
+          phase2RightX = (v2Offset + v2Duration) * cellWidth;
+          rowEl.appendChild(bar2);
         }
-      });
-    }
+      }
 
-    taskGeometry[task.id] = {
-      startX: offsetDays * cellWidth,
-      phase1EndX: phase1RightX,
-      phase2EndX: phase2RightX,
-      yCenter: 50 + index * rowHeight + rowHeight / 2
-    };
-    
-    row.addEventListener('click', () => openEdit(task.id));
-    canvas.appendChild(row);
+      taskGeometry[task.id] = {
+        startX: offsetDays * cellWidth,
+        phase1EndX: phase1RightX,
+        phase2EndX: phase2RightX,
+        yCenter: currentY + rowHeight / 2
+      };
+      
+      rowEl.addEventListener('click', () => openEdit(task.id));
+      canvas.appendChild(rowEl);
+      currentY += rowHeight;
+
+    } else {
+      // 节点行
+      const task = row.task;
+      const ms = row.ms;
+      const rowEl = document.createElement('div');
+      rowEl.className = 'milestone-row'; rowEl.dataset.id = row.id;
+      const rowHeight = 40;
+      rowEl.style.height = rowHeight + 'px';
+      rowEl.style.top = currentY + 'px';
+      
+      let bgHTML = '<div class="grid-bg">';
+      for (let i = 0; i < totalDays; i++) {
+        const d = new Date(minDate); d.setDate(d.getDate() + i);
+        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+        const isToday = d.toDateString() === new Date().toDateString();
+        bgHTML += `<div class="grid-cell ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}"></div>`;
+      }
+      bgHTML += '</div>';
+      rowEl.innerHTML = bgHTML;
+
+      const msDate = new Date(ms.date);
+      const msOffsetDays = getDaysBetween(minDate, msDate);
+      if (msOffsetDays >= 0 && msOffsetDays <= totalDays) {
+        const marker = document.createElement('div');
+        marker.className = 'milestone-marker';
+        marker.setAttribute('data-name', `${ms.name} (${ms.date.slice(5)})`);
+        marker.style.left = `${msOffsetDays * cellWidth}px`;
+        marker.style.borderColor = task.color;
+        marker.style.top = '50%'; // 垂直居中
+        rowEl.appendChild(marker);
+      }
+      
+      canvas.appendChild(rowEl);
+      currentY += rowHeight;
+    }
   });
+
+  // 设置 canvas 高度，确保滚动条正确
+  canvas.style.height = (currentY + 20) + 'px';
 
   // 3. 绘制依赖线 (A → B)
   currentProj.tasks.forEach(task => {
@@ -557,9 +630,9 @@ function render() {
 
     let startX = preGeo.phase2EndX > 0 ? preGeo.phase2EndX : preGeo.phase1EndX;
     if (startX === 0) return;
-    const startY = preGeo.yCenter;
+    const startY = preGeo.yCenter - 50; // 相对于canvas
     const endX = curGeo.startX;
-    const endY = curGeo.yCenter;
+    const endY = curGeo.yCenter - 50;
 
     const midX = startX + 10;
     const pathD = `M ${startX} ${startY} H ${midX} V ${endY} H ${endX - 5}`;
@@ -577,21 +650,42 @@ function render() {
     svgLayer.appendChild(arrow);
   });
 
-  // 左侧高亮联动
-  document.querySelectorAll('.task-item').forEach(el => {
-    el.addEventListener('click', (e) => {
-      if (e.target.closest('.move-btn')) return; // 点了移动按钮就不触发行高亮
-      document.querySelectorAll('.task-item').forEach(e => e.classList.remove('active'));
-      document.querySelectorAll('.task-row').forEach(e => e.classList.remove('active'));
+  // 4. 左侧高亮联动
+  const allLeftRows = document.querySelectorAll('.task-item, .milestone-item-row');
+  allLeftRows.forEach(el => {
+    el.addEventListener('click', () => {
+      allLeftRows.forEach(e => e.classList.remove('active'));
+      document.querySelectorAll('.task-row, .milestone-row').forEach(e => e.classList.remove('active'));
       el.classList.add('active');
-      const row = document.querySelector(`.task-row[data-id="${el.dataset.id}"]`);
-      if (row) row.classList.add('active');
+      const rowId = el.dataset.id;
+      let targetRow;
+      if (el.classList.contains('milestone-item-row')) {
+        targetRow = document.querySelector(`.milestone-row[data-id="${rowId}"]`);
+      } else {
+        targetRow = document.querySelector(`.task-row[data-id="${rowId}"]`);
+      }
+      if (targetRow) targetRow.classList.add('active');
     });
+  });
+
+  // 5. 垂直滚动同步
+  const sidebarEl = document.getElementById('taskSidebar');
+  const viewportEl = document.getElementById('ganttViewport');
+  
+  // 移除旧监听，防止重复
+  sidebarEl.onscroll = null;
+  viewportEl.onscroll = null;
+  
+  sidebarEl.addEventListener('scroll', () => {
+    viewportEl.scrollTop = sidebarEl.scrollTop;
+  });
+  viewportEl.addEventListener('scroll', () => {
+    sidebarEl.scrollTop = viewportEl.scrollTop;
   });
 }
 
 /* =========================================================
-   任务上下移动（核心新增）
+   任务上下移动
    ========================================================= */
 function moveTaskPriority(taskId, direction) {
   const currentProj = getCurrentProject();
@@ -600,7 +694,6 @@ function moveTaskPriority(taskId, direction) {
   if (index === -1) return;
   const targetIndex = index + direction;
   if (targetIndex < 0 || targetIndex >= tasks.length) return;
-  // 交换元素
   const temp = tasks[index];
   tasks[index] = tasks[targetIndex];
   tasks[targetIndex] = temp;
@@ -608,7 +701,7 @@ function moveTaskPriority(taskId, direction) {
   saveState();
 }
 
-// 全局事件委托，处理左侧任务列表的点击
+// 事件委托处理左侧移动按钮
 document.getElementById('taskSidebar').addEventListener('click', (e) => {
   const upBtn = e.target.closest('[data-act="move-task-up"]');
   if (upBtn) { e.stopPropagation(); moveTaskPriority(upBtn.dataset.id, -1); return; }
@@ -752,7 +845,7 @@ function openEdit(id) {
 }
 
 /* =========================================================
-   独立添加节点弹窗（追踪客户节点）
+   独立添加节点弹窗
    ========================================================= */
 const nodeOverlay = document.getElementById('nodeOverlay');
 const nodeTaskSelect = document.getElementById('nodeTaskSelect');
@@ -797,7 +890,7 @@ document.getElementById('nodeSave').onclick = () => {
 };
 
 /* =========================================================
-   项目选择器
+   项目选择器与备份导入
    ========================================================= */
 const projectSelect = document.getElementById('projectSelect');
 function renderProjectSelect() {
@@ -818,9 +911,6 @@ document.getElementById('addProjectBtn').onclick = () => {
   saveState(); renderProjectSelect(); render();
 };
 
-/* =========================================================
-   备份与导入（JSON）
-   ========================================================= */
 document.getElementById('backupBtn').onclick = () => {
   const dataStr = JSON.stringify(state, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
