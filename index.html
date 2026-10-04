@@ -9,11 +9,13 @@
     --bg:#f4f5f7; --card-bg:#ffffff; --text:#2e2a26; --muted:#8c8377;
     --accent:#c8662f; --border:#e2dbd1; --input-bg:#fdfcfa; --sidebar-bg:#ffffff;
     --today-bg:#fff3cd; --sub-bg:#f9f6f2;
+    --customer-color:#e2574c; --internal-color:#0984e3;
   }
   body.dark {
     --bg:#121212; --card-bg:#1e1e1e; --text:#e0e0e0; --muted:#9e9e9e;
     --accent:#e07b39; --border:#444444; --input-bg:#2d2d2d; --sidebar-bg:#1e1e1e;
     --today-bg:#332b00; --sub-bg:#222;
+    --customer-color:#ff7675; --internal-color:#74b9ff;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
@@ -52,10 +54,11 @@
     overflow-y: auto; z-index: 5; box-shadow: 2px 0 5px rgba(0,0,0,.05);
   }
   .sidebar-header {
-    height: 50px; display: flex; align-items: center; padding: 0 15px;
+    height: 74px; display: flex; align-items: center; padding: 0 15px;
     font-weight: 700; font-size: 13px; border-bottom: 1px solid var(--border);
     background: var(--card-bg); position: sticky; top: 0; z-index: 6;
   }
+  
   /* 任务行左侧 */
   .task-item {
     min-height: 60px; display: flex; align-items: center; justify-content: space-between;
@@ -79,23 +82,37 @@
 
   /* 节点行左侧 */
   .milestone-item-row {
-    min-height: 40px; display: flex; align-items: center;
-    padding: 5px 15px 5px 30px; border-bottom: 1px solid var(--border);
+    min-height: 35px; display: flex; align-items: center;
+    padding: 4px 15px 4px 30px; border-bottom: 1px solid var(--border);
     font-size: 12px; cursor: pointer; transition: background 0.15s;
     background: var(--sub-bg);
   }
   .milestone-item-row:hover { background: var(--input-bg); }
   .milestone-item-row.active { background: rgba(200,102,47,.1); border-left: 4px solid var(--accent); }
-  .milestone-info { flex: 1; min-width: 0; }
+  .milestone-info { flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: center;}
   .milestone-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .milestone-date { font-size: 10px; color: var(--muted); }
+  .milestone-date { font-size: 10px; color: var(--muted); flex-shrink: 0; margin-left: 5px;}
+  .milestone-type-icon { font-size: 10px; margin-right: 4px; }
 
   .gantt-viewport { flex: 1; overflow: auto; position: relative; background: var(--bg); }
   .gantt-canvas { display: flex; flex-direction: column; min-width: max-content; position: relative; }
   
+  /* 时间轴双行 */
   .timeline-header {
-    height: 50px; display: flex; border-bottom: 1px solid var(--border);
+    height: 74px; display: flex; flex-direction: column; 
+    border-bottom: 1px solid var(--border);
     background: var(--card-bg); position: sticky; top: 0; z-index: 4;
+  }
+  .timeline-week-row {
+    height: 24px; display: flex; border-bottom: 1px solid var(--border);
+  }
+  .timeline-week-cell {
+    width: 40px; flex-shrink: 0; border-right: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: var(--accent); font-weight: 700;
+  }
+  .timeline-day-row {
+    height: 50px; display: flex;
   }
   .timeline-day {
     width: 40px; flex-shrink: 0; border-right: 1px solid var(--border);
@@ -107,7 +124,7 @@
   .timeline-day .month-label { font-size: 9px; color: var(--muted); }
 
   #dependencyLayer {
-    position: absolute; top: 50px; left: 0; width: 100%; height: 100%;
+    position: absolute; top: 74px; left: 0; width: 100%; height: 100%;
     pointer-events: none; z-index: 1; overflow: visible;
   }
 
@@ -120,7 +137,7 @@
 
   /* 节点行右侧 */
   .milestone-row {
-    height: 40px; display: flex; border-bottom: 1px solid var(--border);
+    height: 35px; display: flex; border-bottom: 1px solid var(--border);
     position: relative; transition: background 0.15s; z-index: 2;
     background: var(--sub-bg);
   }
@@ -155,6 +172,8 @@
     transition: transform 0.2s;
   }
   .milestone-marker:hover { transform: translate(-50%, -50%) rotate(45deg) scale(1.4); z-index: 20; }
+  .milestone-marker.customer { border-color: var(--customer-color); }
+  .milestone-marker.internal { border-color: var(--internal-color); }
   .milestone-marker::after {
     content: attr(data-name); position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,.85); color: #fff; padding: 3px 6px; border-radius: 4px;
@@ -186,14 +205,16 @@
   .milestone-item { display: flex; gap: 5px; margin-bottom: 6px; align-items: center; }
   .milestone-item input[type="text"] { flex: 1; padding: 4px 6px; font-size: 12px; }
   .milestone-item input[type="date"] { width: 105px; padding: 4px 6px; font-size: 12px; }
+  .milestone-item select { width: 70px; padding: 4px 6px; font-size: 12px; }
   .milestone-item .remove-ms { color: #d0453a; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; }
 
   @media (max-width: 768px) {
     .task-sidebar { width: 180px; }
     .task-name { font-size: 12px; }
     .task-owner { font-size: 10px; }
-    .milestone-name { font-size: 11px; }
+    .milestone-name { font-size: 10px; }
     .milestone-date { font-size: 9px; }
+    .timeline-week-cell { width: 30px; font-size: 8px; }
     .timeline-day { width: 30px; font-size: 9px; }
     .grid-cell { width: 30px; }
     .task-bar { font-size: 10px; padding: 0 4px; }
@@ -229,7 +250,10 @@
   </div>
   <div class="gantt-viewport" id="ganttViewport">
     <div class="gantt-canvas" id="ganttCanvas">
-      <div class="timeline-header" id="timelineHeader"></div>
+      <div class="timeline-header" id="timelineHeader">
+        <div class="timeline-week-row" id="timelineWeekHeader"></div>
+        <div class="timeline-day-row" id="timelineDayHeader"></div>
+      </div>
       <svg id="dependencyLayer"></svg>
     </div>
   </div>
@@ -293,6 +317,13 @@
       <select id="nodeTaskSelect"></select>
     </div>
     <div class="field">
+      <label>节点类型</label>
+      <select id="nodeType">
+        <option value="customer">客户节点</option>
+        <option value="internal">内部节点</option>
+      </select>
+    </div>
+    <div class="field">
       <label>节点名称</label>
       <input id="nodeName" placeholder="如：客户确认、初版图纸评审">
     </div>
@@ -328,14 +359,17 @@ function defaultData() {
             start: start.toISOString().slice(0,10), 
             end: new Date(today.getFullYear(), today.getMonth(), 10).toISOString().slice(0,10), 
             start2: '', end2: '', progress: 100, owner: '张三', color: '#6c5ce7', dependencyId: '',
-            milestones: [{ name: '方案评审', date: new Date(today.getFullYear(), today.getMonth(), 8).toISOString().slice(0,10) }]
+            milestones: [
+              { name: '方案评审', date: new Date(today.getFullYear(), today.getMonth(), 8).toISOString().slice(0,10), type: 'customer' },
+              { name: '内部初稿', date: new Date(today.getFullYear(), today.getMonth(), 5).toISOString().slice(0,10), type: 'internal' }
+            ]
           },
           { 
             id: uid(), name: '详细设计', 
             start: new Date(today.getFullYear(), today.getMonth(), 12).toISOString().slice(0,10), 
             end: new Date(today.getFullYear(), today.getMonth(), 25).toISOString().slice(0,10), 
             start2: '', end2: '', progress: 60, owner: '李四', color: '#0984e3', dependencyId: '', 
-            milestones: [{ name: '图纸下发', date: new Date(today.getFullYear(), today.getMonth(), 22).toISOString().slice(0,10) }]
+            milestones: [{ name: '图纸下发', date: new Date(today.getFullYear(), today.getMonth(), 22).toISOString().slice(0,10), type: 'customer' }]
           }
         ]
       }
@@ -351,6 +385,14 @@ function loadState() {
       const d = JSON.parse(raw); 
       if (d && d.projects && d.projects.length > 0) {
         if (!d.currentProjectId) d.currentProjectId = d.projects[0].id;
+        // 兼容旧数据，补充 type
+        d.projects.forEach(p => {
+          p.tasks.forEach(t => {
+            if (t.milestones) {
+              t.milestones.forEach(m => { if (!m.type) m.type = 'customer'; });
+            }
+          });
+        });
         return d; 
       }
     }
@@ -393,7 +435,7 @@ themeBtn.onclick = () => {
 };
 
 /* =========================================================
-   核心渲染逻辑（节点独立成行）
+   核心渲染逻辑（周数 + 节点分类独立成行）
    ========================================================= */
 function getDaysBetween(d1, d2) { return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)); }
 function formatDate(date) {
@@ -401,12 +443,21 @@ function formatDate(date) {
   return `${y}-${m}-${d}`;
 }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+// 获取某天是当年的第几周
+function getWeekNumber(d) {
+  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return weekNo;
+}
 
 function render() {
   const currentProj = getCurrentProject();
   if (!currentProj) {
     document.getElementById('taskSidebar').innerHTML = '<div class="sidebar-header">任务列表</div><div style="padding:20px;font-size:12px;color:#888;">请先点击上方“＋ 项目”</div>';
-    document.getElementById('timelineHeader').innerHTML = '';
+    document.getElementById('timelineWeekHeader').innerHTML = '';
+    document.getElementById('timelineDayHeader').innerHTML = '';
     document.querySelectorAll('.task-row, .milestone-row').forEach(r => r.remove());
     return;
   }
@@ -434,15 +485,22 @@ function render() {
   const totalDays = getDaysBetween(minDate, maxDate);
   const cellWidth = window.innerWidth <= 768 ? 30 : 40;
 
-  // 构建行数据结构：任务行 + 节点行
+  // 构建行数据结构：任务行 + 客户节点行 + 内部节点行
   const renderRows = [];
   currentProj.tasks.forEach(task => {
     renderRows.push({ type: 'task', task: task, id: task.id });
-    if (task.milestones && task.milestones.length > 0) {
-      task.milestones.forEach(ms => {
-        renderRows.push({ type: 'milestone', task: task, ms: ms, id: 'ms-' + task.id + '-' + ms.name + '-' + ms.date });
-      });
-    }
+    
+    // 筛选客户节点
+    const customerMilestones = (task.milestones || []).filter(m => m.type === 'customer' || !m.type);
+    customerMilestones.forEach(ms => {
+      renderRows.push({ type: 'milestone', task: task, ms: ms, milestoneType: 'customer', id: 'ms-' + task.id + '-' + ms.name + '-' + ms.date });
+    });
+    
+    // 筛选内部节点
+    const internalMilestones = (task.milestones || []).filter(m => m.type === 'internal');
+    internalMilestones.forEach(ms => {
+      renderRows.push({ type: 'milestone', task: task, ms: ms, milestoneType: 'internal', id: 'ms-' + task.id + '-' + ms.name + '-' + ms.date });
+    });
   });
 
   // 1. 左侧列表
@@ -451,8 +509,6 @@ function render() {
   renderRows.forEach((row, index) => {
     if (row.type === 'task') {
       const task = row.task;
-      const isFirst = index === 0 || renderRows[index - 1].type !== 'task';
-      // 找到上一个任务在当前列表中的索引，判断是否可以上移
       const taskIndex = currentProj.tasks.findIndex(t => t.id === task.id);
       const isFirstTask = taskIndex === 0;
       const isLastTask = taskIndex === currentProj.tasks.length - 1;
@@ -471,10 +527,16 @@ function render() {
       `;
     } else {
       const ms = row.ms;
+      const isCustomer = row.milestoneType === 'customer';
       sidebarHTML += `
         <div class="milestone-item-row" data-id="${row.id}" data-task-id="${row.task.id}">
           <div class="milestone-info">
-            <div class="milestone-name">└─ ${esc(ms.name)}</div>
+            <div class="milestone-name">
+              <span class="milestone-type-icon" style="color: ${isCustomer ? 'var(--customer-color)' : 'var(--internal-color)'}">
+                ${isCustomer ? '👤' : '⚙️'}
+              </span>
+              ${esc(ms.name)}
+            </div>
             <div class="milestone-date">${esc(ms.date)}</div>
           </div>
         </div>
@@ -483,51 +545,74 @@ function render() {
   });
   sidebar.innerHTML = sidebarHTML;
 
-  // 2. 时间轴
-  const header = document.getElementById('timelineHeader');
-  let headerHTML = '';
+  // 2. 时间轴（周数行 + 日期行）
+  const weekHeader = document.getElementById('timelineWeekHeader');
+  const dayHeader = document.getElementById('timelineDayHeader');
+  let weekHTML = '';
+  let dayHTML = '';
+  
+  let lastWeek = -1;
   for (let i = 0; i < totalDays; i++) {
     const d = new Date(minDate); d.setDate(d.getDate() + i);
+    const weekNo = getWeekNumber(d);
     const isWeekend = d.getDay() === 0 || d.getDay() === 6;
     const isToday = d.toDateString() === new Date().toDateString();
     const monthLabel = d.getDate() === 1 ? `${d.getMonth()+1}月` : '';
-    headerHTML += `
+    
+    // 周数行：只有周数变化时才显示文字
+    if (weekNo !== lastWeek) {
+      weekHTML += `<div class="timeline-week-cell">第${weekNo}周</div>`;
+      lastWeek = weekNo;
+    } else {
+      weekHTML += `<div class="timeline-week-cell"></div>`;
+    }
+    
+    dayHTML += `
       <div class="timeline-day ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}">
         <div>${d.getDate()}</div>
         <div class="month-label">${monthLabel}</div>
       </div>
     `;
   }
-  header.innerHTML = headerHTML;
+  weekHeader.innerHTML = weekHTML;
+  dayHeader.innerHTML = dayHTML;
 
   document.querySelectorAll('.task-row, .milestone-row').forEach(r => r.remove());
   const svgLayer = document.getElementById('dependencyLayer');
   svgLayer.innerHTML = '';
   const canvas = document.getElementById('ganttCanvas');
   
-  const taskGeometry = {}; // 记录任务行的Y坐标
-  let currentY = 50; // 从时间轴下方开始
+  const taskGeometry = {};
+  let currentY = 74; // 时间轴总高度 74px
 
-  renderRows.forEach((row, index) => {
+  renderRows.forEach((row) => {
+    const rowEl = document.createElement('div');
+    let rowHeight = 0;
+
+    if (row.type === 'task') {
+      rowEl.className = 'task-row'; rowEl.dataset.id = row.id;
+      rowHeight = 60;
+    } else {
+      rowEl.className = 'milestone-row'; rowEl.dataset.id = row.id;
+      rowHeight = 35;
+    }
+    
+    rowEl.style.height = rowHeight + 'px';
+    rowEl.style.top = currentY + 'px';
+    
+    // 背景网格
+    let bgHTML = '<div class="grid-bg">';
+    for (let i = 0; i < totalDays; i++) {
+      const d = new Date(minDate); d.setDate(d.getDate() + i);
+      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+      const isToday = d.toDateString() === new Date().toDateString();
+      bgHTML += `<div class="grid-cell ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}"></div>`;
+    }
+    bgHTML += '</div>';
+    rowEl.innerHTML = bgHTML;
+
     if (row.type === 'task') {
       const task = row.task;
-      const rowEl = document.createElement('div');
-      rowEl.className = 'task-row'; rowEl.dataset.id = task.id;
-      const rowHeight = 60;
-      rowEl.style.height = rowHeight + 'px';
-      rowEl.style.top = currentY + 'px'; // 使用绝对定位
-      
-      let bgHTML = '<div class="grid-bg">';
-      for (let i = 0; i < totalDays; i++) {
-        const d = new Date(minDate); d.setDate(d.getDate() + i);
-        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-        const isToday = d.toDateString() === new Date().toDateString();
-        bgHTML += `<div class="grid-cell ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}"></div>`;
-      }
-      bgHTML += '</div>';
-      rowEl.innerHTML = bgHTML;
-
-      // 任务条
       const taskStart = new Date(task.start); const taskEnd = new Date(task.end);
       const offsetDays = getDaysBetween(minDate, taskStart);
       const durationDays = getDaysBetween(taskStart, taskEnd) + 1;
@@ -577,47 +662,29 @@ function render() {
       };
       
       rowEl.addEventListener('click', () => openEdit(task.id));
-      canvas.appendChild(rowEl);
-      currentY += rowHeight;
 
     } else {
       // 节点行
       const task = row.task;
       const ms = row.ms;
-      const rowEl = document.createElement('div');
-      rowEl.className = 'milestone-row'; rowEl.dataset.id = row.id;
-      const rowHeight = 40;
-      rowEl.style.height = rowHeight + 'px';
-      rowEl.style.top = currentY + 'px';
+      const isCustomer = row.milestoneType === 'customer';
       
-      let bgHTML = '<div class="grid-bg">';
-      for (let i = 0; i < totalDays; i++) {
-        const d = new Date(minDate); d.setDate(d.getDate() + i);
-        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-        const isToday = d.toDateString() === new Date().toDateString();
-        bgHTML += `<div class="grid-cell ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}"></div>`;
-      }
-      bgHTML += '</div>';
-      rowEl.innerHTML = bgHTML;
-
       const msDate = new Date(ms.date);
       const msOffsetDays = getDaysBetween(minDate, msDate);
       if (msOffsetDays >= 0 && msOffsetDays <= totalDays) {
         const marker = document.createElement('div');
-        marker.className = 'milestone-marker';
+        marker.className = `milestone-marker ${isCustomer ? 'customer' : 'internal'}`;
         marker.setAttribute('data-name', `${ms.name} (${ms.date.slice(5)})`);
         marker.style.left = `${msOffsetDays * cellWidth}px`;
-        marker.style.borderColor = task.color;
-        marker.style.top = '50%'; // 垂直居中
+        marker.style.top = '50%'; 
         rowEl.appendChild(marker);
       }
-      
-      canvas.appendChild(rowEl);
-      currentY += rowHeight;
     }
+    
+    canvas.appendChild(rowEl);
+    currentY += rowHeight;
   });
 
-  // 设置 canvas 高度，确保滚动条正确
   canvas.style.height = (currentY + 20) + 'px';
 
   // 3. 绘制依赖线 (A → B)
@@ -630,9 +697,9 @@ function render() {
 
     let startX = preGeo.phase2EndX > 0 ? preGeo.phase2EndX : preGeo.phase1EndX;
     if (startX === 0) return;
-    const startY = preGeo.yCenter - 50; // 相对于canvas
+    const startY = preGeo.yCenter - 74; // 减去时间轴高度
     const endX = curGeo.startX;
-    const endY = curGeo.yCenter - 50;
+    const endY = curGeo.yCenter - 74;
 
     const midX = startX + 10;
     const pathD = `M ${startX} ${startY} H ${midX} V ${endY} H ${endX - 5}`;
@@ -672,7 +739,6 @@ function render() {
   const sidebarEl = document.getElementById('taskSidebar');
   const viewportEl = document.getElementById('ganttViewport');
   
-  // 移除旧监听，防止重复
   sidebarEl.onscroll = null;
   viewportEl.onscroll = null;
   
@@ -701,7 +767,6 @@ function moveTaskPriority(taskId, direction) {
   saveState();
 }
 
-// 事件委托处理左侧移动按钮
 document.getElementById('taskSidebar').addEventListener('click', (e) => {
   const upBtn = e.target.closest('[data-act="move-task-up"]');
   if (upBtn) { e.stopPropagation(); moveTaskPriority(upBtn.dataset.id, -1); return; }
@@ -732,6 +797,10 @@ function renderMilestones(milestones) {
     div.innerHTML = `
       <input type="text" placeholder="节点名称" value="${ms.name || ''}" data-index="${index}" class="ms-name">
       <input type="date" value="${ms.date || ''}" data-index="${index}" class="ms-date">
+      <select class="ms-type" data-index="${index}">
+        <option value="customer" ${ms.type === 'customer' || !ms.type ? 'selected' : ''}>客户</option>
+        <option value="internal" ${ms.type === 'internal' ? 'selected' : ''}>内部</option>
+      </select>
       <button type="button" class="remove-ms" data-index="${index}">✕</button>
     `;
     milestoneList.appendChild(div);
@@ -743,7 +812,8 @@ function collectMilestones() {
   items.forEach(item => {
     const name = item.querySelector('.ms-name').value.trim();
     const date = item.querySelector('.ms-date').value;
-    if (name && date) msArray.push({ name, date });
+    const type = item.querySelector('.ms-type').value;
+    if (name && date) msArray.push({ name, date, type });
   });
   return msArray;
 }
@@ -757,7 +827,7 @@ milestoneList.addEventListener('click', (e) => {
 });
 document.getElementById('addMilestoneBtn').onclick = () => {
   const current = collectMilestones();
-  current.push({ name: '', date: formatDate(new Date()) });
+  current.push({ name: '', date: formatDate(new Date()), type: 'customer' });
   renderMilestones(current);
 };
 
@@ -851,6 +921,7 @@ const nodeOverlay = document.getElementById('nodeOverlay');
 const nodeTaskSelect = document.getElementById('nodeTaskSelect');
 const nodeName = document.getElementById('nodeName');
 const nodeDate = document.getElementById('nodeDate');
+const nodeType = document.getElementById('nodeType');
 
 document.getElementById('addNodeBtn').onclick = () => {
   const currentProj = getCurrentProject();
@@ -862,6 +933,7 @@ document.getElementById('addNodeBtn').onclick = () => {
   
   nodeName.value = '';
   nodeDate.value = formatDate(new Date());
+  nodeType.value = 'customer';
   nodeOverlay.classList.add('show');
   setTimeout(() => nodeName.focus(), 30);
 };
@@ -874,6 +946,7 @@ document.getElementById('nodeSave').onclick = () => {
   const taskId = nodeTaskSelect.value;
   const name = nodeName.value.trim();
   const date = nodeDate.value;
+  const type = nodeType.value;
 
   if (!name) { alert('请输入节点名称'); return; }
   if (!date) { alert('请选择节点日期'); return; }
@@ -881,7 +954,7 @@ document.getElementById('nodeSave').onclick = () => {
   const task = currentProj.tasks.find(t => t.id === taskId);
   if (task) {
     if (!task.milestones) task.milestones = [];
-    task.milestones.push({ name, date });
+    task.milestones.push({ name, date, type });
     nodeOverlay.classList.remove('show');
     render();
     saveState();
