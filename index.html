@@ -47,7 +47,7 @@
 
   .planner-container { flex:1; display:flex; overflow:hidden; position:relative; }
   .task-sidebar {
-    width: 240px; flex-shrink: 0; background:var(--sidebar-bg);
+    width: 260px; flex-shrink: 0; background:var(--sidebar-bg);
     border-right: 2px solid var(--border); display: flex; flex-direction: column;
     overflow-y: auto; z-index: 5; box-shadow: 2px 0 5px rgba(0,0,0,.05);
   }
@@ -57,14 +57,28 @@
     background: var(--card-bg); position: sticky; top: 0; z-index: 6;
   }
   .task-item {
-    min-height: 60px; display: flex; flex-direction: column; justify-content: center;
-    padding: 8px 15px; border-bottom: 1px solid var(--border); font-size: 13px;
+    min-height: 60px; display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px 8px 15px; border-bottom: 1px solid var(--border); font-size: 13px;
     cursor: pointer; transition: background 0.15s;
   }
   .task-item:hover { background: var(--input-bg); }
   .task-item.active { background: rgba(200,102,47,.1); border-left: 4px solid var(--accent); }
-  .task-name { font-weight: 600; margin-bottom: 4px; word-break: break-word; }
+  .task-info { flex: 1; min-width: 0; }
+  .task-name { font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .task-owner { font-size: 11px; color: var(--muted); }
+
+  /* 上下移动按钮 */
+  .task-move-btns {
+    display: flex; flex-direction: column; gap: 2px; margin-left: 6px;
+  }
+  .move-btn {
+    background: rgba(100,100,100,.08); color: var(--muted); border: none;
+    width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; transition: .15s;
+  }
+  .move-btn:hover:not(:disabled) { background: var(--accent); color: #fff; }
+  .move-btn:disabled { opacity: 0.3; cursor: not-allowed; background: transparent; }
 
   .gantt-viewport { flex: 1; overflow: auto; position: relative; background: var(--bg); }
   .gantt-canvas { display: flex; flex-direction: column; min-width: max-content; position: relative; }
@@ -100,7 +114,7 @@
   .grid-cell.today { background: var(--today-bg); }
 
   .task-bar {
-    position: absolute; top: 8px; height: 22px; border-radius: 4px;
+    position: absolute; top: 6px; height: 22px; border-radius: 4px;
     background: var(--accent); color: #fff; font-size: 11px; padding: 0 6px;
     display: flex; align-items: center; justify-content: space-between;
     white-space: nowrap; overflow: visible; box-shadow: 0 1px 3px rgba(0,0,0,.2);
@@ -114,8 +128,9 @@
   }
   .task-bar .bar-text { position: relative; z-index: 3; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
 
+  /* 独立节点样式 */
   .milestone-marker {
-    position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(45deg);
+    position: absolute; transform: translate(-50%, -50%) rotate(45deg);
     width: 10px; height: 10px; background: #fff; border: 2px solid #333;
     z-index: 5; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.3);
     transition: transform 0.2s;
@@ -155,7 +170,7 @@
   .milestone-item .remove-ms { color: #d0453a; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; }
 
   @media (max-width: 768px) {
-    .task-sidebar { width: 140px; }
+    .task-sidebar { width: 180px; }
     .task-name { font-size: 12px; }
     .task-owner { font-size: 10px; }
     .timeline-day { width: 30px; font-size: 9px; }
@@ -164,7 +179,7 @@
     .task-bar.phase2 { font-size: 9px; }
     .milestone-marker { width: 8px; height: 8px; }
     header h1 { display: none; }
-    .project-selector { width: 110px; font-size: 12px; }
+    .project-selector { width: 100px; font-size: 12px; }
   }
 </style>
 </head>
@@ -398,14 +413,22 @@ function render() {
   const totalDays = getDaysBetween(minDate, maxDate);
   const cellWidth = window.innerWidth <= 768 ? 30 : 40;
 
-  // 1. 左侧任务列表（极简：只保留任务名和负责人）
+  // 1. 左侧任务列表（支持上下移动）
   const sidebar = document.getElementById('taskSidebar');
   let sidebarHTML = '<div class="sidebar-header">任务列表</div>';
-  currentProj.tasks.forEach((task) => {
+  currentProj.tasks.forEach((task, index) => {
+    const isFirst = index === 0;
+    const isLast = index === currentProj.tasks.length - 1;
     sidebarHTML += `
       <div class="task-item" data-id="${task.id}" style="border-left: 4px solid ${task.color}">
-        <div class="task-name">${esc(task.name)}</div>
-        <div class="task-owner">${esc(task.owner || '未分配')}</div>
+        <div class="task-info">
+          <div class="task-name">${esc(task.name)}</div>
+          <div class="task-owner">${esc(task.owner || '未分配')}</div>
+        </div>
+        <div class="task-move-btns">
+          <button class="move-btn" data-act="move-task-up" data-id="${task.id}" ${isFirst ? 'disabled' : ''} title="上移">↑</button>
+          <button class="move-btn" data-act="move-task-down" data-id="${task.id}" ${isLast ? 'disabled' : ''} title="下移">↓</button>
+        </div>
       </div>
     `;
   });
@@ -469,24 +492,10 @@ function render() {
         <span class="bar-text" style="font-size:10px; opacity:.8">${task.progress}%</span>
       `;
       phase1RightX = (visibleOffset + visibleDuration) * cellWidth;
-
-      if (task.milestones && task.milestones.length > 0) {
-        task.milestones.forEach(ms => {
-          const msDate = new Date(ms.date);
-          const msOffsetDays = getDaysBetween(taskStart, msDate);
-          if (msOffsetDays >= 0 && msOffsetDays <= durationDays) {
-            const marker = document.createElement('div');
-            marker.className = 'milestone-marker';
-            marker.setAttribute('data-name', `${ms.name} (${ms.date.slice(5)})`);
-            marker.style.left = `${(msOffsetDays / durationDays) * 100}%`;
-            marker.style.borderColor = task.color;
-            bar.appendChild(marker);
-          }
-        });
-      }
       row.appendChild(bar);
     }
 
+    // 阶段2任务条
     let phase2RightX = 0;
     if (task.start2 && task.end2) {
       const t2Start = new Date(task.start2); const t2End = new Date(task.end2);
@@ -504,6 +513,27 @@ function render() {
         phase2RightX = (v2Offset + v2Duration) * cellWidth;
         row.appendChild(bar2);
       }
+    }
+
+    // 🌟 核心修改：节点独立渲染，不再依赖任务条的宽度
+    if (task.milestones && task.milestones.length > 0) {
+      task.milestones.forEach(ms => {
+        const msDate = new Date(ms.date);
+        const msOffsetDays = getDaysBetween(minDate, msDate);
+        // 只要节点在可见的时间范围内，就渲染
+        if (msOffsetDays >= 0 && msOffsetDays <= totalDays) {
+          const marker = document.createElement('div');
+          marker.className = 'milestone-marker';
+          marker.setAttribute('data-name', `${ms.name} (${ms.date.slice(5)})`);
+          // 直接根据天数差计算绝对位置
+          marker.style.left = `${msOffsetDays * cellWidth}px`;
+          marker.style.borderColor = task.color;
+          // 垂直定位：放在行的中央，或者避开任务条放在下方
+          // 这里我们放在行的中央偏下一点
+          marker.style.top = '45px'; 
+          row.appendChild(marker);
+        }
+      });
     }
 
     taskGeometry[task.id] = {
@@ -549,7 +579,8 @@ function render() {
 
   // 左侧高亮联动
   document.querySelectorAll('.task-item').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.move-btn')) return; // 点了移动按钮就不触发行高亮
       document.querySelectorAll('.task-item').forEach(e => e.classList.remove('active'));
       document.querySelectorAll('.task-row').forEach(e => e.classList.remove('active'));
       el.classList.add('active');
@@ -558,6 +589,32 @@ function render() {
     });
   });
 }
+
+/* =========================================================
+   任务上下移动（核心新增）
+   ========================================================= */
+function moveTaskPriority(taskId, direction) {
+  const currentProj = getCurrentProject();
+  const tasks = currentProj.tasks;
+  const index = tasks.findIndex(t => t.id === taskId);
+  if (index === -1) return;
+  const targetIndex = index + direction;
+  if (targetIndex < 0 || targetIndex >= tasks.length) return;
+  // 交换元素
+  const temp = tasks[index];
+  tasks[index] = tasks[targetIndex];
+  tasks[targetIndex] = temp;
+  render();
+  saveState();
+}
+
+// 全局事件委托，处理左侧任务列表的点击
+document.getElementById('taskSidebar').addEventListener('click', (e) => {
+  const upBtn = e.target.closest('[data-act="move-task-up"]');
+  if (upBtn) { e.stopPropagation(); moveTaskPriority(upBtn.dataset.id, -1); return; }
+  const downBtn = e.target.closest('[data-act="move-task-down"]');
+  if (downBtn) { e.stopPropagation(); moveTaskPriority(downBtn.dataset.id, 1); return; }
+});
 
 /* =========================================================
    任务新增/编辑/删除
