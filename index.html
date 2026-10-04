@@ -24,75 +24,64 @@
     background:var(--bg); color:var(--text); transition:.3s;
   }
   header{
-    display:flex; align-items:center; padding:10px 20px; background:var(--card-bg);
-    border-bottom:1px solid var(--border); gap:10px; z-index:10; flex-shrink:0;
+    display:flex; align-items:center; padding:8px 12px; background:var(--card-bg);
+    border-bottom:1px solid var(--border); gap:6px; z-index:10; flex-shrink:0;
     box-shadow:0 2px 5px rgba(0,0,0,.05); flex-wrap: wrap;
   }
-  header h1{font-size:16px; font-weight:700; margin-right:auto;}
+  header h1{font-size:14px; font-weight:700; margin-right:auto;}
   .btn{
     border:1px solid var(--border); background:var(--card-bg); color:var(--text);
-    padding:7px 14px; border-radius:8px; font-size:13px; cursor:pointer; transition:.15s; font-family:inherit;
+    padding:5px 8px; border-radius:6px; font-size:11px; cursor:pointer; transition:.15s; font-family:inherit;
     white-space:nowrap;
   }
   .btn:hover{background:var(--input-bg);}
   .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
   .btn.primary:hover{opacity:.9;}
   .btn.danger{color:#d0453a; border-color:#f0cfcc;}
-  .btn.icon{padding:7px 10px;}
-  .btn.small{padding:5px 10px; font-size:12px;}
+  .btn.icon{padding:5px 8px;}
+  .btn.small{padding:4px 6px; font-size:10px;}
 
   .project-selector {
-    padding:6px 10px; border:1px solid var(--border); border-radius:8px;
-    background:var(--input-bg); color:var(--text); font-size:13px; outline:none; max-width:180px;
+    padding:5px 8px; border:1px solid var(--border); border-radius:6px;
+    background:var(--input-bg); color:var(--text); font-size:11px; outline:none; max-width:110px;
     font-family:inherit;
   }
 
   .planner-container { flex:1; display:flex; overflow:hidden; position:relative; }
   .task-sidebar {
-    width: 260px; flex-shrink: 0; background:var(--sidebar-bg);
+    width: 210px; flex-shrink: 0; background:var(--sidebar-bg);
     border-right: 2px solid var(--border); display: flex; flex-direction: column;
     overflow-y: auto; z-index: 5; box-shadow: 2px 0 5px rgba(0,0,0,.05);
   }
   .sidebar-header {
-    height: 74px; display: flex; align-items: center; padding: 0 15px;
-    font-weight: 700; font-size: 13px; border-bottom: 1px solid var(--border);
+    height: 74px; display: flex; align-items: center; padding: 0 10px;
+    font-weight: 700; font-size: 12px; border-bottom: 1px solid var(--border);
     background: var(--card-bg); position: sticky; top: 0; z-index: 6;
   }
   
   /* 任务行左侧 */
   .task-item {
-    min-height: 60px; display: flex; align-items: center; justify-content: space-between;
-    padding: 8px 10px 8px 15px; border-bottom: 1px solid var(--border); font-size: 13px;
-    cursor: pointer; transition: background 0.15s;
+    min-height: 60px; display: flex; align-items: center; padding: 6px 8px 6px 12px;
+    border-bottom: 1px solid var(--border); font-size: 12px; transition: background 0.15s;
   }
   .task-item:hover { background: var(--input-bg); }
   .task-item.active { background: rgba(200,102,47,.1); border-left: 4px solid var(--accent); }
-  .task-info { flex: 1; min-width: 0; }
-  .task-name { font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .task-owner { font-size: 11px; color: var(--muted); }
-  .task-move-btns { display: flex; flex-direction: column; gap: 2px; margin-left: 6px; }
-  .move-btn {
-    background: rgba(100,100,100,.08); color: var(--muted); border: none;
-    width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; transition: .15s;
-  }
-  .move-btn:hover:not(:disabled) { background: var(--accent); color: #fff; }
-  .move-btn:disabled { opacity: 0.3; cursor: not-allowed; background: transparent; }
+  .task-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+  .task-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .task-owner { font-size: 10px; color: var(--muted); margin-top: 2px; }
 
   /* 节点行左侧 */
   .milestone-item-row {
     min-height: 35px; display: flex; align-items: center;
-    padding: 4px 15px 4px 30px; border-bottom: 1px solid var(--border);
-    font-size: 12px; cursor: pointer; transition: background 0.15s;
-    background: var(--sub-bg);
+    padding: 4px 10px 4px 20px; border-bottom: 1px solid var(--border);
+    font-size: 11px; transition: background 0.15s; background: var(--sub-bg);
   }
   .milestone-item-row:hover { background: var(--input-bg); }
   .milestone-item-row.active { background: rgba(200,102,47,.1); border-left: 4px solid var(--accent); }
   .milestone-info { flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: center;}
   .milestone-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .milestone-date { font-size: 10px; color: var(--muted); flex-shrink: 0; margin-left: 5px;}
-  .milestone-type-icon { font-size: 10px; margin-right: 4px; }
+  .milestone-date { font-size: 9px; color: var(--muted); flex-shrink: 0; margin-left: 4px;}
+  .milestone-type-icon { font-size: 10px; margin-right: 3px; }
 
   .gantt-viewport { flex: 1; overflow: auto; position: relative; background: var(--bg); }
   .gantt-canvas { display: flex; flex-direction: column; min-width: max-content; position: relative; }
@@ -107,21 +96,22 @@
     height: 24px; display: flex; border-bottom: 1px solid var(--border);
   }
   .timeline-week-cell {
-    width: 40px; flex-shrink: 0; border-right: 1px solid var(--border);
+    flex-shrink: 0; border-right: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
     font-size: 9px; color: var(--accent); font-weight: 700;
+    background: rgba(200,102,47,.05);
   }
   .timeline-day-row {
     height: 50px; display: flex;
   }
   .timeline-day {
-    width: 40px; flex-shrink: 0; border-right: 1px solid var(--border);
+    width: 30px; flex-shrink: 0; border-right: 1px solid var(--border);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-size: 10px; color: var(--muted); line-height: 1.2;
+    font-size: 9px; color: var(--muted); line-height: 1.2;
   }
   .timeline-day.weekend { background: rgba(0,0,0,.03); }
   .timeline-day.today { background: var(--today-bg); color: var(--accent); font-weight: 700; }
-  .timeline-day .month-label { font-size: 9px; color: var(--muted); }
+  .timeline-day .month-label { font-size: 8px; color: var(--muted); }
 
   #dependencyLayer {
     position: absolute; top: 74px; left: 0; width: 100%; height: 100%;
@@ -138,25 +128,24 @@
   /* 节点行右侧 */
   .milestone-row {
     height: 35px; display: flex; border-bottom: 1px solid var(--border);
-    position: relative; transition: background 0.15s; z-index: 2;
-    background: var(--sub-bg);
+    position: relative; transition: background 0.15s; z-index: 2; background: var(--sub-bg);
   }
   .milestone-row:hover { background: var(--input-bg); }
   .milestone-row.active { background: rgba(200,102,47,.05); }
   
   .grid-bg { position: absolute; inset: 0; display: flex; pointer-events: none; z-index: 0; }
-  .grid-cell { width: 40px; flex-shrink: 0; border-right: 1px solid var(--border); }
+  .grid-cell { width: 30px; flex-shrink: 0; border-right: 1px solid var(--border); }
   .grid-cell.weekend { background: rgba(0,0,0,.02); }
   .grid-cell.today { background: var(--today-bg); }
 
   .task-bar {
     position: absolute; top: 8px; height: 22px; border-radius: 4px;
-    background: var(--accent); color: #fff; font-size: 11px; padding: 0 6px;
+    background: var(--accent); color: #fff; font-size: 10px; padding: 0 4px;
     display: flex; align-items: center; justify-content: space-between;
     white-space: nowrap; overflow: visible; box-shadow: 0 1px 3px rgba(0,0,0,.2);
     cursor: pointer; transition: transform .1s; z-index: 3;
   }
-  .task-bar.phase2 { top: 32px; height: 18px; font-size: 10px; opacity: .95; border-radius: 3px; }
+  .task-bar.phase2 { top: 32px; height: 18px; font-size: 9px; opacity: .95; border-radius: 3px; }
   .task-bar:hover { transform: scaleY(1.1); box-shadow: 0 3px 8px rgba(0,0,0,.3); z-index: 10; }
   .task-bar .progress-fill {
     position: absolute; left: 0; top: 0; bottom: 0; background: rgba(0,0,0,.2);
@@ -185,43 +174,36 @@
   .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; }
   .overlay.show{display:flex;}
   .modal{
-    background:var(--card-bg); border-radius:14px; width:100%; max-width:480px;
+    background:var(--card-bg); border-radius:14px; width:100%; max-width:420px;
     padding:20px; box-shadow:0 20px 60px rgba(0,0,0,.25); max-height:90vh; overflow-y:auto;
     animation:pop .16s ease-out;
   }
   @keyframes pop{from{transform:translateY(8px); opacity:0;} to{transform:none; opacity:1;}}
-  .m-title{font-size:17px; font-weight:600; margin-bottom:15px;}
-  .field{margin-bottom:14px;}
-  .field label{display:block; font-size:12px; color:var(--muted); margin-bottom:5px;}
+  .m-title{font-size:16px; font-weight:600; margin-bottom:15px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:11px; color:var(--muted); margin-bottom:4px;}
   .modal input, .modal select, .modal textarea {
-    width:100%; border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:14px;
+    width:100%; border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-size:13px;
     font-family:inherit; color:var(--text); background:var(--input-bg); outline:none; transition:.15s;
   }
   .modal input:focus, .modal select:focus { border-color:var(--accent); background:var(--card-bg); }
-  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .modal-actions{display:flex; gap:8px; margin-top:15px; align-items:center;}
 
-  .milestone-list { border: 1px solid var(--border); border-radius: 8px; padding: 8px; background: var(--input-bg); max-height: 120px; overflow-y: auto; margin-bottom: 5px; }
-  .milestone-item { display: flex; gap: 5px; margin-bottom: 6px; align-items: center; }
-  .milestone-item input[type="text"] { flex: 1; padding: 4px 6px; font-size: 12px; }
-  .milestone-item input[type="date"] { width: 105px; padding: 4px 6px; font-size: 12px; }
-  .milestone-item select { width: 70px; padding: 4px 6px; font-size: 12px; }
-  .milestone-item .remove-ms { color: #d0453a; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; }
-
   @media (max-width: 768px) {
-    .task-sidebar { width: 180px; }
-    .task-name { font-size: 12px; }
-    .task-owner { font-size: 10px; }
+    .task-sidebar { width: 160px; }
+    .task-name { font-size: 11px; }
+    .task-owner { font-size: 9px; }
     .milestone-name { font-size: 10px; }
-    .milestone-date { font-size: 9px; }
-    .timeline-week-cell { width: 30px; font-size: 8px; }
-    .timeline-day { width: 30px; font-size: 9px; }
+    .timeline-week-cell { font-size: 8px; }
+    .timeline-day { width: 30px; font-size: 8px; }
     .grid-cell { width: 30px; }
-    .task-bar { font-size: 10px; padding: 0 4px; }
-    .task-bar.phase2 { font-size: 9px; }
+    .task-bar { font-size: 9px; padding: 0 3px; }
+    .task-bar.phase2 { font-size: 8px; }
     .milestone-marker { width: 8px; height: 8px; }
     header h1 { display: none; }
-    .project-selector { width: 100px; font-size: 12px; }
+    .project-selector { width: 80px; font-size: 10px; }
+    .btn { padding: 4px 6px; font-size: 10px; }
   }
 </style>
 </head>
@@ -231,8 +213,11 @@
   <h1>🌰 Empower</h1>
   <select class="project-selector" id="projectSelect"></select>
   <button class="btn small" id="addProjectBtn">＋ 项目</button>
-  <button class="btn primary" id="addTaskBtn">＋ 任务</button>
-  <button class="btn small" id="addNodeBtn" style="border-color:var(--accent); color:var(--accent);">＋ 节点</button>
+  <button class="btn primary small" id="addTaskBtn">＋ 任务</button>
+  
+  <!-- 独立节点按钮 -->
+  <button class="btn small" id="addCustomerNodeBtn" style="border-color:var(--customer-color); color:var(--customer-color);">＋ 客户节点</button>
+  <button class="btn small" id="addInternalNodeBtn" style="border-color:var(--internal-color); color:var(--internal-color);">＋ 内部节点</button>
   
   <div style="flex:1"></div>
   
@@ -241,7 +226,7 @@
   <input type="file" id="importFileInput" accept=".json" style="display:none;">
   
   <button class="btn icon" id="themeToggle" title="切换深色/浅色">🌙</button>
-  <button class="btn danger" id="resetBtn">重置</button>
+  <button class="btn danger small" id="resetBtn">重置</button>
 </header>
 
 <div class="planner-container">
@@ -294,11 +279,6 @@
         <option value="#0984e3">采购（蓝色）</option>
       </select>
     </div>
-    <div class="field">
-      <label>关键节点（里程碑）</label>
-      <div class="milestone-list" id="milestoneList"></div>
-      <button type="button" class="btn small" id="addMilestoneBtn">＋ 添加节点</button>
-    </div>
     <div class="modal-actions">
       <button class="btn danger" id="mDelete">删除</button>
       <div style="flex:1"></div>
@@ -308,21 +288,10 @@
   </div>
 </div>
 
-<!-- 独立添加节点弹窗 -->
+<!-- 节点弹窗（客户/内部共用） -->
 <div class="overlay" id="nodeOverlay">
   <div class="modal">
-    <div class="m-title">添加节点（追踪客户节点）</div>
-    <div class="field">
-      <label>选择所属任务</label>
-      <select id="nodeTaskSelect"></select>
-    </div>
-    <div class="field">
-      <label>节点类型</label>
-      <select id="nodeType">
-        <option value="customer">客户节点</option>
-        <option value="internal">内部节点</option>
-      </select>
-    </div>
+    <div class="m-title" id="nodeModalTitle">添加节点</div>
     <div class="field">
       <label>节点名称</label>
       <input id="nodeName" placeholder="如：客户确认、初版图纸评审">
@@ -342,7 +311,7 @@
 /* =========================================================
    数据层
    ========================================================= */
-const STORAGE_KEY = 'empower-plan-v1';
+const STORAGE_KEY = 'empower-plan-v2';
 const THEME_KEY = 'empower-plan-theme';
 const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -353,24 +322,22 @@ function defaultData() {
     projects: [
       {
         id: uid(), name: '默认项目',
-        tasks: [
+        items: [ // 统一存放任务和节点
           { 
-            id: uid(), name: '概念设计', 
+            id: uid(), type: 'task', name: '概念设计', 
             start: start.toISOString().slice(0,10), 
             end: new Date(today.getFullYear(), today.getMonth(), 10).toISOString().slice(0,10), 
-            start2: '', end2: '', progress: 100, owner: '张三', color: '#6c5ce7', dependencyId: '',
-            milestones: [
-              { name: '方案评审', date: new Date(today.getFullYear(), today.getMonth(), 8).toISOString().slice(0,10), type: 'customer' },
-              { name: '内部初稿', date: new Date(today.getFullYear(), today.getMonth(), 5).toISOString().slice(0,10), type: 'internal' }
-            ]
+            start2: '', end2: '', progress: 100, owner: '张三', color: '#6c5ce7', dependencyId: ''
           },
+          { id: uid(), type: 'customer_node', name: '客户确认方案', date: new Date(today.getFullYear(), today.getMonth(), 8).toISOString().slice(0,10) },
+          { id: uid(), type: 'internal_node', name: '内部初稿评审', date: new Date(today.getFullYear(), today.getMonth(), 5).toISOString().slice(0,10) },
           { 
-            id: uid(), name: '详细设计', 
+            id: uid(), type: 'task', name: '详细设计', 
             start: new Date(today.getFullYear(), today.getMonth(), 12).toISOString().slice(0,10), 
             end: new Date(today.getFullYear(), today.getMonth(), 25).toISOString().slice(0,10), 
-            start2: '', end2: '', progress: 60, owner: '李四', color: '#0984e3', dependencyId: '', 
-            milestones: [{ name: '图纸下发', date: new Date(today.getFullYear(), today.getMonth(), 22).toISOString().slice(0,10), type: 'customer' }]
-          }
+            start2: '', end2: '', progress: 60, owner: '李四', color: '#0984e3', dependencyId: ''
+          },
+          { id: uid(), type: 'customer_node', name: '图纸下发客户', date: new Date(today.getFullYear(), today.getMonth(), 22).toISOString().slice(0,10) }
         ]
       }
     ],
@@ -385,14 +352,6 @@ function loadState() {
       const d = JSON.parse(raw); 
       if (d && d.projects && d.projects.length > 0) {
         if (!d.currentProjectId) d.currentProjectId = d.projects[0].id;
-        // 兼容旧数据，补充 type
-        d.projects.forEach(p => {
-          p.tasks.forEach(t => {
-            if (t.milestones) {
-              t.milestones.forEach(m => { if (!m.type) m.type = 'customer'; });
-            }
-          });
-        });
         return d; 
       }
     }
@@ -405,6 +364,7 @@ function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(st
 
 let state = loadState();
 let editingId = null;
+let currentNodeType = 'customer'; // 当前添加的节点类型
 
 function getCurrentProject() {
   let proj = state.projects.find(p => p.id === state.currentProjectId);
@@ -435,7 +395,7 @@ themeBtn.onclick = () => {
 };
 
 /* =========================================================
-   核心渲染逻辑（周数 + 节点分类独立成行）
+   核心渲染逻辑
    ========================================================= */
 function getDaysBetween(d1, d2) { return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)); }
 function formatDate(date) {
@@ -443,7 +403,6 @@ function formatDate(date) {
   return `${y}-${m}-${d}`;
 }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-// 获取某天是当年的第几周
 function getWeekNumber(d) {
   d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
@@ -464,15 +423,25 @@ function render() {
 
   const today = new Date(); today.setHours(0,0,0,0);
   let minDate = new Date(); let maxDate = new Date();
-  if (currentProj.tasks.length > 0) {
-    minDate = new Date(currentProj.tasks[0].start);
-    maxDate = new Date(currentProj.tasks[0].end);
-    currentProj.tasks.forEach(t => {
-      if (new Date(t.start) < minDate) minDate = new Date(t.start);
-      if (new Date(t.end) > maxDate) maxDate = new Date(t.end);
-      if (t.start2 && new Date(t.start2) < minDate) minDate = new Date(t.start2);
-      if (t.end2 && new Date(t.end2) > maxDate) maxDate = new Date(t.end2);
-    });
+  if (currentProj.items.length > 0) {
+    // 找到第一个任务的日期范围
+    const tasks = currentProj.items.filter(i => i.type === 'task');
+    if (tasks.length > 0) {
+      minDate = new Date(tasks[0].start);
+      maxDate = new Date(tasks[0].end);
+      currentProj.items.forEach(item => {
+        if (item.type === 'task') {
+          if (new Date(item.start) < minDate) minDate = new Date(item.start);
+          if (new Date(item.end) > maxDate) maxDate = new Date(item.end);
+          if (item.start2 && new Date(item.start2) < minDate) minDate = new Date(item.start2);
+          if (item.end2 && new Date(item.end2) > maxDate) maxDate = new Date(item.end2);
+        } else {
+          // 节点日期也参与范围计算
+          if (new Date(item.date) < minDate) minDate = new Date(item.date);
+          if (new Date(item.date) > maxDate) maxDate = new Date(item.date);
+        }
+      });
+    }
   } else {
     minDate = new Date(today); minDate.setDate(today.getDate() - 3);
     maxDate = new Date(today); maxDate.setDate(today.getDate() + 7);
@@ -483,61 +452,33 @@ function render() {
   maxDate.setDate(maxDate.getDate() + 7);
   
   const totalDays = getDaysBetween(minDate, maxDate);
-  const cellWidth = window.innerWidth <= 768 ? 30 : 40;
-
-  // 构建行数据结构：任务行 + 客户节点行 + 内部节点行
-  const renderRows = [];
-  currentProj.tasks.forEach(task => {
-    renderRows.push({ type: 'task', task: task, id: task.id });
-    
-    // 筛选客户节点
-    const customerMilestones = (task.milestones || []).filter(m => m.type === 'customer' || !m.type);
-    customerMilestones.forEach(ms => {
-      renderRows.push({ type: 'milestone', task: task, ms: ms, milestoneType: 'customer', id: 'ms-' + task.id + '-' + ms.name + '-' + ms.date });
-    });
-    
-    // 筛选内部节点
-    const internalMilestones = (task.milestones || []).filter(m => m.type === 'internal');
-    internalMilestones.forEach(ms => {
-      renderRows.push({ type: 'milestone', task: task, ms: ms, milestoneType: 'internal', id: 'ms-' + task.id + '-' + ms.name + '-' + ms.date });
-    });
-  });
+  const cellWidth = 30;
 
   // 1. 左侧列表
   const sidebar = document.getElementById('taskSidebar');
   let sidebarHTML = '<div class="sidebar-header">任务列表</div>';
-  renderRows.forEach((row, index) => {
-    if (row.type === 'task') {
-      const task = row.task;
-      const taskIndex = currentProj.tasks.findIndex(t => t.id === task.id);
-      const isFirstTask = taskIndex === 0;
-      const isLastTask = taskIndex === currentProj.tasks.length - 1;
-      
+  currentProj.items.forEach((item) => {
+    if (item.type === 'task') {
       sidebarHTML += `
-        <div class="task-item" data-id="${task.id}" style="border-left: 4px solid ${task.color}">
+        <div class="task-item" data-id="${item.id}" style="border-left: 4px solid ${item.color}">
           <div class="task-info">
-            <div class="task-name">${esc(task.name)}</div>
-            <div class="task-owner">${esc(task.owner || '未分配')}</div>
-          </div>
-          <div class="task-move-btns">
-            <button class="move-btn" data-act="move-task-up" data-id="${task.id}" ${isFirstTask ? 'disabled' : ''} title="上移">↑</button>
-            <button class="move-btn" data-act="move-task-down" data-id="${task.id}" ${isLastTask ? 'disabled' : ''} title="下移">↓</button>
+            <div class="task-name">${esc(item.name)}</div>
+            <div class="task-owner">${esc(item.owner || '未分配')}</div>
           </div>
         </div>
       `;
     } else {
-      const ms = row.ms;
-      const isCustomer = row.milestoneType === 'customer';
+      const isCustomer = item.type === 'customer_node';
       sidebarHTML += `
-        <div class="milestone-item-row" data-id="${row.id}" data-task-id="${row.task.id}">
+        <div class="milestone-item-row" data-id="${item.id}">
           <div class="milestone-info">
             <div class="milestone-name">
               <span class="milestone-type-icon" style="color: ${isCustomer ? 'var(--customer-color)' : 'var(--internal-color)'}">
                 ${isCustomer ? '👤' : '⚙️'}
               </span>
-              ${esc(ms.name)}
+              ${esc(item.name)}
             </div>
-            <div class="milestone-date">${esc(ms.date)}</div>
+            <div class="milestone-date">${esc(item.date)}</div>
           </div>
         </div>
       `;
@@ -545,28 +486,36 @@ function render() {
   });
   sidebar.innerHTML = sidebarHTML;
 
-  // 2. 时间轴（周数行 + 日期行）
+  // 2. 时间轴（周数合并）
   const weekHeader = document.getElementById('timelineWeekHeader');
   const dayHeader = document.getElementById('timelineDayHeader');
   let weekHTML = '';
   let dayHTML = '';
   
-  let lastWeek = -1;
-  for (let i = 0; i < totalDays; i++) {
-    const d = new Date(minDate); d.setDate(d.getDate() + i);
-    const weekNo = getWeekNumber(d);
+  // 计算周数合并
+  let i = 0;
+  while (i < totalDays) {
+    let d = new Date(minDate); d.setDate(d.getDate() + i);
+    let weekNo = getWeekNumber(d);
+    let spanDays = 0;
+    for (let j = i; j < totalDays; j++) {
+      let tempD = new Date(minDate); tempD.setDate(tempD.getDate() + j);
+      if (getWeekNumber(tempD) === weekNo) {
+        spanDays++;
+      } else {
+        break;
+      }
+    }
+    let width = spanDays * cellWidth;
+    weekHTML += `<div class="timeline-week-cell" style="width: ${width}px;">第${weekNo}周</div>`;
+    i += spanDays;
+  }
+  
+  for (let k = 0; k < totalDays; k++) {
+    const d = new Date(minDate); d.setDate(d.getDate() + k);
     const isWeekend = d.getDay() === 0 || d.getDay() === 6;
     const isToday = d.toDateString() === new Date().toDateString();
     const monthLabel = d.getDate() === 1 ? `${d.getMonth()+1}月` : '';
-    
-    // 周数行：只有周数变化时才显示文字
-    if (weekNo !== lastWeek) {
-      weekHTML += `<div class="timeline-week-cell">第${weekNo}周</div>`;
-      lastWeek = weekNo;
-    } else {
-      weekHTML += `<div class="timeline-week-cell"></div>`;
-    }
-    
     dayHTML += `
       <div class="timeline-day ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}">
         <div>${d.getDate()}</div>
@@ -577,30 +526,28 @@ function render() {
   weekHeader.innerHTML = weekHTML;
   dayHeader.innerHTML = dayHTML;
 
+  // 3. 右侧甘特图
   document.querySelectorAll('.task-row, .milestone-row').forEach(r => r.remove());
   const svgLayer = document.getElementById('dependencyLayer');
   svgLayer.innerHTML = '';
   const canvas = document.getElementById('ganttCanvas');
   
   const taskGeometry = {};
-  let currentY = 74; // 时间轴总高度 74px
+  let currentY = 74;
 
-  renderRows.forEach((row) => {
+  currentProj.items.forEach((item) => {
     const rowEl = document.createElement('div');
     let rowHeight = 0;
 
-    if (row.type === 'task') {
-      rowEl.className = 'task-row'; rowEl.dataset.id = row.id;
-      rowHeight = 60;
+    if (item.type === 'task') {
+      rowEl.className = 'task-row'; rowEl.dataset.id = item.id; rowHeight = 60;
     } else {
-      rowEl.className = 'milestone-row'; rowEl.dataset.id = row.id;
-      rowHeight = 35;
+      rowEl.className = 'milestone-row'; rowEl.dataset.id = item.id; rowHeight = 35;
     }
     
     rowEl.style.height = rowHeight + 'px';
     rowEl.style.top = currentY + 'px';
     
-    // 背景网格
     let bgHTML = '<div class="grid-bg">';
     for (let i = 0; i < totalDays; i++) {
       const d = new Date(minDate); d.setDate(d.getDate() + i);
@@ -611,9 +558,8 @@ function render() {
     bgHTML += '</div>';
     rowEl.innerHTML = bgHTML;
 
-    if (row.type === 'task') {
-      const task = row.task;
-      const taskStart = new Date(task.start); const taskEnd = new Date(task.end);
+    if (item.type === 'task') {
+      const taskStart = new Date(item.start); const taskEnd = new Date(item.end);
       const offsetDays = getDaysBetween(minDate, taskStart);
       const durationDays = getDaysBetween(taskStart, taskEnd) + 1;
       const visibleOffset = Math.max(0, offsetDays);
@@ -625,19 +571,19 @@ function render() {
         bar.className = 'task-bar phase1';
         bar.style.left = `${visibleOffset * cellWidth}px`;
         bar.style.width = `${visibleDuration * cellWidth}px`;
-        bar.style.background = task.color;
+        bar.style.background = item.color;
         bar.innerHTML = `
-          <div class="progress-fill" style="width: ${task.progress}%; background: rgba(0,0,0,0.25);"></div>
-          <span class="bar-text">${esc(task.name)}</span>
-          <span class="bar-text" style="font-size:10px; opacity:.8">${task.progress}%</span>
+          <div class="progress-fill" style="width: ${item.progress}%; background: rgba(0,0,0,0.25);"></div>
+          <span class="bar-text">${esc(item.name)}</span>
+          <span class="bar-text" style="font-size:10px; opacity:.8">${item.progress}%</span>
         `;
         phase1RightX = (visibleOffset + visibleDuration) * cellWidth;
         rowEl.appendChild(bar);
       }
 
       let phase2RightX = 0;
-      if (task.start2 && task.end2) {
-        const t2Start = new Date(task.start2); const t2End = new Date(task.end2);
+      if (item.start2 && item.end2) {
+        const t2Start = new Date(item.start2); const t2End = new Date(item.end2);
         const o2Days = getDaysBetween(minDate, t2Start);
         const d2Days = getDaysBetween(t2Start, t2End) + 1;
         const v2Offset = Math.max(0, o2Days);
@@ -647,38 +593,43 @@ function render() {
           bar2.className = 'task-bar phase2';
           bar2.style.left = `${v2Offset * cellWidth}px`;
           bar2.style.width = `${v2Duration * cellWidth}px`;
-          bar2.style.background = task.color + 'cc';
+          bar2.style.background = item.color + 'cc';
           bar2.innerHTML = `<span class="bar-text">阶段2</span>`;
           phase2RightX = (v2Offset + v2Duration) * cellWidth;
           rowEl.appendChild(bar2);
         }
       }
 
-      taskGeometry[task.id] = {
+      taskGeometry[item.id] = {
         startX: offsetDays * cellWidth,
         phase1EndX: phase1RightX,
         phase2EndX: phase2RightX,
         yCenter: currentY + rowHeight / 2
       };
       
-      rowEl.addEventListener('click', () => openEdit(task.id));
+      rowEl.addEventListener('click', () => openEdit(item.id));
 
     } else {
       // 节点行
-      const task = row.task;
-      const ms = row.ms;
-      const isCustomer = row.milestoneType === 'customer';
-      
-      const msDate = new Date(ms.date);
+      const msDate = new Date(item.date);
       const msOffsetDays = getDaysBetween(minDate, msDate);
       if (msOffsetDays >= 0 && msOffsetDays <= totalDays) {
         const marker = document.createElement('div');
+        const isCustomer = item.type === 'customer_node';
         marker.className = `milestone-marker ${isCustomer ? 'customer' : 'internal'}`;
-        marker.setAttribute('data-name', `${ms.name} (${ms.date.slice(5)})`);
+        marker.setAttribute('data-name', `${item.name} (${item.date.slice(5)})`);
         marker.style.left = `${msOffsetDays * cellWidth}px`;
         marker.style.top = '50%'; 
         rowEl.appendChild(marker);
       }
+      // 节点行点击可以打开编辑（简单起见，这里只做高亮）
+      rowEl.addEventListener('click', () => {
+        document.querySelectorAll('.task-item, .milestone-item-row').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('.task-row, .milestone-row').forEach(e => e.classList.remove('active'));
+        rowEl.classList.add('active');
+        const leftRow = document.querySelector(`.milestone-item-row[data-id="${item.id}"]`);
+        if (leftRow) leftRow.classList.add('active');
+      });
     }
     
     canvas.appendChild(rowEl);
@@ -687,8 +638,9 @@ function render() {
 
   canvas.style.height = (currentY + 20) + 'px';
 
-  // 3. 绘制依赖线 (A → B)
-  currentProj.tasks.forEach(task => {
+  // 4. 绘制依赖线
+  const tasks = currentProj.items.filter(i => i.type === 'task');
+  tasks.forEach(task => {
     if (!task.dependencyId) return;
     const preId = task.dependencyId;
     const preGeo = taskGeometry[preId];
@@ -697,7 +649,7 @@ function render() {
 
     let startX = preGeo.phase2EndX > 0 ? preGeo.phase2EndX : preGeo.phase1EndX;
     if (startX === 0) return;
-    const startY = preGeo.yCenter - 74; // 减去时间轴高度
+    const startY = preGeo.yCenter - 74;
     const endX = curGeo.startX;
     const endY = curGeo.yCenter - 74;
 
@@ -717,7 +669,7 @@ function render() {
     svgLayer.appendChild(arrow);
   });
 
-  // 4. 左侧高亮联动
+  // 5. 左侧高亮联动
   const allLeftRows = document.querySelectorAll('.task-item, .milestone-item-row');
   allLeftRows.forEach(el => {
     el.addEventListener('click', () => {
@@ -725,54 +677,19 @@ function render() {
       document.querySelectorAll('.task-row, .milestone-row').forEach(e => e.classList.remove('active'));
       el.classList.add('active');
       const rowId = el.dataset.id;
-      let targetRow;
-      if (el.classList.contains('milestone-item-row')) {
-        targetRow = document.querySelector(`.milestone-row[data-id="${rowId}"]`);
-      } else {
-        targetRow = document.querySelector(`.task-row[data-id="${rowId}"]`);
-      }
+      let targetRow = document.querySelector(`.task-row[data-id="${rowId}"]`) || document.querySelector(`.milestone-row[data-id="${rowId}"]`);
       if (targetRow) targetRow.classList.add('active');
     });
   });
 
-  // 5. 垂直滚动同步
+  // 6. 垂直滚动同步
   const sidebarEl = document.getElementById('taskSidebar');
   const viewportEl = document.getElementById('ganttViewport');
-  
   sidebarEl.onscroll = null;
   viewportEl.onscroll = null;
-  
-  sidebarEl.addEventListener('scroll', () => {
-    viewportEl.scrollTop = sidebarEl.scrollTop;
-  });
-  viewportEl.addEventListener('scroll', () => {
-    sidebarEl.scrollTop = viewportEl.scrollTop;
-  });
+  sidebarEl.addEventListener('scroll', () => { viewportEl.scrollTop = sidebarEl.scrollTop; });
+  viewportEl.addEventListener('scroll', () => { sidebarEl.scrollTop = viewportEl.scrollTop; });
 }
-
-/* =========================================================
-   任务上下移动
-   ========================================================= */
-function moveTaskPriority(taskId, direction) {
-  const currentProj = getCurrentProject();
-  const tasks = currentProj.tasks;
-  const index = tasks.findIndex(t => t.id === taskId);
-  if (index === -1) return;
-  const targetIndex = index + direction;
-  if (targetIndex < 0 || targetIndex >= tasks.length) return;
-  const temp = tasks[index];
-  tasks[index] = tasks[targetIndex];
-  tasks[targetIndex] = temp;
-  render();
-  saveState();
-}
-
-document.getElementById('taskSidebar').addEventListener('click', (e) => {
-  const upBtn = e.target.closest('[data-act="move-task-up"]');
-  if (upBtn) { e.stopPropagation(); moveTaskPriority(upBtn.dataset.id, -1); return; }
-  const downBtn = e.target.closest('[data-act="move-task-down"]');
-  if (downBtn) { e.stopPropagation(); moveTaskPriority(downBtn.dataset.id, 1); return; }
-});
 
 /* =========================================================
    任务新增/编辑/删除
@@ -787,57 +704,15 @@ const mOwner = document.getElementById('mOwner');
 const mProgress = document.getElementById('mProgress');
 const mColor = document.getElementById('mColor');
 const mDependency = document.getElementById('mDependency');
-const milestoneList = document.getElementById('milestoneList');
-
-function renderMilestones(milestones) {
-  milestoneList.innerHTML = '';
-  milestones.forEach((ms, index) => {
-    const div = document.createElement('div');
-    div.className = 'milestone-item';
-    div.innerHTML = `
-      <input type="text" placeholder="节点名称" value="${ms.name || ''}" data-index="${index}" class="ms-name">
-      <input type="date" value="${ms.date || ''}" data-index="${index}" class="ms-date">
-      <select class="ms-type" data-index="${index}">
-        <option value="customer" ${ms.type === 'customer' || !ms.type ? 'selected' : ''}>客户</option>
-        <option value="internal" ${ms.type === 'internal' ? 'selected' : ''}>内部</option>
-      </select>
-      <button type="button" class="remove-ms" data-index="${index}">✕</button>
-    `;
-    milestoneList.appendChild(div);
-  });
-}
-function collectMilestones() {
-  const items = milestoneList.querySelectorAll('.milestone-item');
-  const msArray = [];
-  items.forEach(item => {
-    const name = item.querySelector('.ms-name').value.trim();
-    const date = item.querySelector('.ms-date').value;
-    const type = item.querySelector('.ms-type').value;
-    if (name && date) msArray.push({ name, date, type });
-  });
-  return msArray;
-}
-milestoneList.addEventListener('click', (e) => {
-  if (e.target.classList.contains('remove-ms')) {
-    const index = parseInt(e.target.dataset.index);
-    const current = collectMilestones();
-    current.splice(index, 1);
-    renderMilestones(current);
-  }
-});
-document.getElementById('addMilestoneBtn').onclick = () => {
-  const current = collectMilestones();
-  current.push({ name: '', date: formatDate(new Date()), type: 'customer' });
-  renderMilestones(current);
-};
 
 function openModal(title, task = null) {
   document.getElementById('modalTitle').textContent = title;
   const currentProj = getCurrentProject();
   if (!currentProj) return alert('请先创建一个项目');
   
+  const tasks = currentProj.items.filter(i => i.type === 'task');
   let depOptions = '<option value="">无依赖</option>';
-  currentProj.tasks.forEach(t => {
+  tasks.forEach(t => {
     if (task && t.id === task.id) return;
     depOptions += `<option value="${t.id}">${esc(t.name)}</option>`;
   });
@@ -849,14 +724,13 @@ function openModal(title, task = null) {
     mStart2.value = task.start2 || ''; mEnd2.value = task.end2 || '';
     mOwner.value = task.owner || ''; mProgress.value = task.progress || 0;
     mColor.value = task.color || '#c8662f'; mDependency.value = task.dependencyId || '';
-    renderMilestones(task.milestones || []);
   } else {
     editingId = null;
     const today = new Date();
     const nextWeek = new Date(today); nextWeek.setDate(today.getDate() + 6);
     mName.value = ''; mStart.value = formatDate(today); mEnd.value = formatDate(nextWeek);
     mStart2.value = ''; mEnd2.value = ''; mOwner.value = ''; mProgress.value = 0;
-    mColor.value = '#c8662f'; mDependency.value = ''; renderMilestones([]);
+    mColor.value = '#c8662f'; mDependency.value = '';
   }
   overlay.classList.add('show');
   setTimeout(() => mName.focus(), 30);
@@ -880,18 +754,18 @@ document.getElementById('mSave').onclick = () => {
   if (mStart.value > mEnd.value) { alert('阶段1：开始日期不能晚于结束日期'); return; }
   if (mStart2.value && mEnd2.value && mStart2.value > mEnd2.value) { alert('阶段2：开始日期不能晚于结束日期'); return; }
 
-  const milestones = collectMilestones();
   const taskData = {
+    type: 'task',
     name, start: mStart.value, end: mEnd.value, start2: mStart2.value, end2: mEnd2.value,
     owner: mOwner.value.trim(), progress: parseInt(mProgress.value) || 0,
-    color: mColor.value, dependencyId: mDependency.value, milestones: milestones
+    color: mColor.value, dependencyId: mDependency.value
   };
 
   if (editingId) {
-    const task = currentProj.tasks.find(t => t.id === editingId);
+    const task = currentProj.items.find(t => t.id === editingId);
     if (task) Object.assign(task, taskData);
   } else {
-    currentProj.tasks.push({ id: uid(), ...taskData });
+    currentProj.items.push({ id: uid(), ...taskData });
   }
   closeModal(); render(); saveState();
 };
@@ -901,8 +775,8 @@ document.getElementById('mDelete').onclick = () => {
   if (!confirm('确定删除这个任务吗？')) return;
   const currentProj = getCurrentProject();
   if (currentProj) {
-    currentProj.tasks = currentProj.tasks.filter(t => t.id !== editingId);
-    currentProj.tasks.forEach(t => { if (t.dependencyId === editingId) t.dependencyId = ''; });
+    currentProj.items = currentProj.items.filter(t => t.id !== editingId);
+    currentProj.items.forEach(t => { if (t.dependencyId === editingId) t.dependencyId = ''; });
   }
   closeModal(); render(); saveState();
 };
@@ -910,30 +784,29 @@ document.getElementById('mDelete').onclick = () => {
 function openEdit(id) {
   const currentProj = getCurrentProject();
   if (!currentProj) return;
-  const task = currentProj.tasks.find(t => t.id === id);
+  const task = currentProj.items.find(t => t.id === id);
   if (task) openModal('编辑任务', task);
 }
 
 /* =========================================================
-   独立添加节点弹窗
+   独立节点新增（客户/内部）
    ========================================================= */
 const nodeOverlay = document.getElementById('nodeOverlay');
-const nodeTaskSelect = document.getElementById('nodeTaskSelect');
+const nodeModalTitle = document.getElementById('nodeModalTitle');
 const nodeName = document.getElementById('nodeName');
 const nodeDate = document.getElementById('nodeDate');
-const nodeType = document.getElementById('nodeType');
 
-document.getElementById('addNodeBtn').onclick = () => {
-  const currentProj = getCurrentProject();
-  if (!currentProj || currentProj.tasks.length === 0) return alert('请先创建至少一个任务');
-  
-  nodeTaskSelect.innerHTML = currentProj.tasks.map(t => 
-    `<option value="${t.id}">${esc(t.name)}</option>`
-  ).join('');
-  
-  nodeName.value = '';
-  nodeDate.value = formatDate(new Date());
-  nodeType.value = 'customer';
+document.getElementById('addCustomerNodeBtn').onclick = () => {
+  currentNodeType = 'customer_node';
+  nodeModalTitle.textContent = '添加客户节点';
+  nodeName.value = ''; nodeDate.value = formatDate(new Date());
+  nodeOverlay.classList.add('show');
+  setTimeout(() => nodeName.focus(), 30);
+};
+document.getElementById('addInternalNodeBtn').onclick = () => {
+  currentNodeType = 'internal_node';
+  nodeModalTitle.textContent = '添加内部节点';
+  nodeName.value = ''; nodeDate.value = formatDate(new Date());
   nodeOverlay.classList.add('show');
   setTimeout(() => nodeName.focus(), 30);
 };
@@ -943,23 +816,19 @@ nodeOverlay.addEventListener('click', e => { if (e.target === nodeOverlay) nodeO
 
 document.getElementById('nodeSave').onclick = () => {
   const currentProj = getCurrentProject();
-  const taskId = nodeTaskSelect.value;
   const name = nodeName.value.trim();
   const date = nodeDate.value;
-  const type = nodeType.value;
 
   if (!name) { alert('请输入节点名称'); return; }
   if (!date) { alert('请选择节点日期'); return; }
 
-  const task = currentProj.tasks.find(t => t.id === taskId);
-  if (task) {
-    if (!task.milestones) task.milestones = [];
-    task.milestones.push({ name, date, type });
-    nodeOverlay.classList.remove('show');
-    render();
-    saveState();
-    alert('✅ 节点已添加！');
-  }
+  currentProj.items.push({
+    id: uid(), type: currentNodeType, name: name, date: date
+  });
+  nodeOverlay.classList.remove('show');
+  render();
+  saveState();
+  alert('✅ 节点已添加！');
 };
 
 /* =========================================================
@@ -978,7 +847,7 @@ projectSelect.onchange = (e) => {
 document.getElementById('addProjectBtn').onclick = () => {
   const name = prompt('请输入新项目名称', '新项目');
   if (name === null) return;
-  const newProj = { id: uid(), name: name.trim() || '未命名项目', tasks: [] };
+  const newProj = { id: uid(), name: name.trim() || '未命名项目', items: [] };
   state.projects.push(newProj);
   state.currentProjectId = newProj.id;
   saveState(); renderProjectSelect(); render();
