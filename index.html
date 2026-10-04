@@ -8,12 +8,12 @@
   :root{
     --bg:#f4f5f7; --card-bg:#ffffff; --text:#2e2a26; --muted:#8c8377;
     --accent:#c8662f; --border:#e2dbd1; --input-bg:#fdfcfa; --sidebar-bg:#ffffff;
-    --today-bg:#fff3cd;
+    --today-bg:#fff3cd; --sub-bg:#f9f6f2;
   }
   body.dark {
     --bg:#121212; --card-bg:#1e1e1e; --text:#e0e0e0; --muted:#9e9e9e;
     --accent:#e07b39; --border:#444444; --input-bg:#2d2d2d; --sidebar-bg:#1e1e1e;
-    --today-bg:#332b00;
+    --today-bg:#332b00; --sub-bg:#222;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
@@ -37,11 +37,17 @@
   .btn.primary:hover{opacity:.9;}
   .btn.danger{color:#d0453a; border-color:#f0cfcc;}
   .btn.icon{padding:7px 10px;}
-  .btn.small{padding:4px 8px; font-size:11px;}
+  .btn.small{padding:5px 10px; font-size:12px;}
+
+  .project-selector {
+    padding:6px 10px; border:1px solid var(--border); border-radius:8px;
+    background:var(--input-bg); color:var(--text); font-size:13px; outline:none; max-width:180px;
+    font-family:inherit;
+  }
 
   .planner-container { flex:1; display:flex; overflow:hidden; position:relative; }
   .task-sidebar {
-    width: 280px; flex-shrink: 0; background:var(--sidebar-bg);
+    width: 240px; flex-shrink: 0; background:var(--sidebar-bg);
     border-right: 2px solid var(--border); display: flex; flex-direction: column;
     overflow-y: auto; z-index: 5; box-shadow: 2px 0 5px rgba(0,0,0,.05);
   }
@@ -57,8 +63,8 @@
   }
   .task-item:hover { background: var(--input-bg); }
   .task-item.active { background: rgba(200,102,47,.1); border-left: 4px solid var(--accent); }
-  .task-name { font-weight: 600; margin-bottom: 3px; display: flex; justify-content: space-between; }
-  .task-meta { font-size: 11px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap;}
+  .task-name { font-weight: 600; margin-bottom: 4px; word-break: break-word; }
+  .task-owner { font-size: 11px; color: var(--muted); }
 
   .gantt-viewport { flex: 1; overflow: auto; position: relative; background: var(--bg); }
   .gantt-canvas { display: flex; flex-direction: column; min-width: max-content; position: relative; }
@@ -110,13 +116,13 @@
 
   .milestone-marker {
     position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(45deg);
-    width: 8px; height: 8px; background: #fff; border: 2px solid #333;
+    width: 10px; height: 10px; background: #fff; border: 2px solid #333;
     z-index: 5; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.3);
     transition: transform 0.2s;
   }
   .milestone-marker:hover { transform: translate(-50%, -50%) rotate(45deg) scale(1.4); z-index: 20; }
   .milestone-marker::after {
-    content: attr(data-name); position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    content: attr(data-name); position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,.85); color: #fff; padding: 3px 6px; border-radius: 4px;
     font-size: 10px; white-space: nowrap; display: none; pointer-events: none;
     font-family: sans-serif; z-index: 100;
@@ -126,7 +132,7 @@
   .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; }
   .overlay.show{display:flex;}
   .modal{
-    background:var(--card-bg); border-radius:14px; width:100%; max-width:520px;
+    background:var(--card-bg); border-radius:14px; width:100%; max-width:480px;
     padding:20px; box-shadow:0 20px 60px rgba(0,0,0,.25); max-height:90vh; overflow-y:auto;
     animation:pop .16s ease-out;
   }
@@ -135,9 +141,8 @@
   .field{margin-bottom:14px;}
   .field label{display:block; font-size:12px; color:var(--muted); margin-bottom:5px;}
   .modal input, .modal select, .modal textarea {
-    width:100%; border:1px solid var(--border); border-radius:8px;
-    padding:8px 10px; font-size:14px; font-family:inherit; color:var(--text);
-    background:var(--input-bg); outline:none;
+    width:100%; border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-size:14px;
+    font-family:inherit; color:var(--text); background:var(--input-bg); outline:none; transition:.15s;
   }
   .modal input:focus, .modal select:focus { border-color:var(--accent); background:var(--card-bg); }
   .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
@@ -150,21 +155,16 @@
   .milestone-item .remove-ms { color: #d0453a; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; }
 
   @media (max-width: 768px) {
-    .task-sidebar { width: 160px; }
+    .task-sidebar { width: 140px; }
     .task-name { font-size: 12px; }
+    .task-owner { font-size: 10px; }
     .timeline-day { width: 30px; font-size: 9px; }
     .grid-cell { width: 30px; }
     .task-bar { font-size: 10px; padding: 0 4px; }
     .task-bar.phase2 { font-size: 9px; }
-    .milestone-marker { width: 6px; height: 6px; }
+    .milestone-marker { width: 8px; height: 8px; }
     header h1 { display: none; }
-    .project-selector { width: 130px !important; font-size: 12px !important; }
-  }
-  /* 新增项目下拉框样式 */
-  .project-selector {
-    padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px;
-    background: var(--input-bg); color: var(--text); font-size: 13px; outline: none; max-width: 200px;
-    font-family: inherit;
+    .project-selector { width: 110px; font-size: 12px; }
   }
 </style>
 </head>
@@ -172,11 +172,17 @@
 
 <header>
   <h1>🌰 Empower</h1>
-  <!-- 项目选择器 -->
   <select class="project-selector" id="projectSelect"></select>
-  <button class="btn small" id="addProjectBtn">＋ 新建项目</button>
-  <button class="btn primary" id="addTaskBtn">＋ 新建任务</button>
-  <button class="btn" id="exportBtn">导出Excel</button>
+  <button class="btn small" id="addProjectBtn">＋ 项目</button>
+  <button class="btn primary" id="addTaskBtn">＋ 任务</button>
+  <button class="btn small" id="addNodeBtn" style="border-color:var(--accent); color:var(--accent);">＋ 节点</button>
+  
+  <div style="flex:1"></div>
+  
+  <button class="btn small" id="backupBtn">📥 备份JSON</button>
+  <button class="btn small" id="importBtn">📤 导入JSON</button>
+  <input type="file" id="importFileInput" accept=".json" style="display:none;">
+  
   <button class="btn icon" id="themeToggle" title="切换深色/浅色">🌙</button>
   <button class="btn danger" id="resetBtn">重置</button>
 </header>
@@ -193,7 +199,7 @@
   </div>
 </div>
 
-<!-- 弹窗（任务） -->
+<!-- 任务弹窗 -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="m-title" id="modalTitle">新建任务</div>
@@ -214,7 +220,7 @@
       <div class="field"><label>进度 (%)</label><input type="number" id="mProgress" min="0" max="100" value="0"></div>
     </div>
     <div class="field">
-      <label>前置任务（依赖关系）</label>
+      <label>前置任务（依赖关系 A → B）</label>
       <select id="mDependency"><option value="">无依赖</option></select>
     </div>
     <div class="field">
@@ -242,11 +248,34 @@
   </div>
 </div>
 
+<!-- 独立添加节点弹窗 -->
+<div class="overlay" id="nodeOverlay">
+  <div class="modal">
+    <div class="m-title">添加节点（追踪客户节点）</div>
+    <div class="field">
+      <label>选择所属任务</label>
+      <select id="nodeTaskSelect"></select>
+    </div>
+    <div class="field">
+      <label>节点名称</label>
+      <input id="nodeName" placeholder="如：客户确认、初版图纸评审">
+    </div>
+    <div class="field">
+      <label>节点日期</label>
+      <input type="date" id="nodeDate">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="nodeCancel">取消</button>
+      <button class="btn primary" id="nodeSave">保存节点</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* =========================================================
-   数据层（升级为多项目结构）
+   数据层
    ========================================================= */
-const STORAGE_KEY = 'empower-plan-multi-v1';
+const STORAGE_KEY = 'empower-plan-v1';
 const THEME_KEY = 'empower-plan-theme';
 const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -275,7 +304,7 @@ function defaultData() {
         ]
       }
     ],
-    currentProjectId: null // 稍后设置
+    currentProjectId: null
   };
 }
 
@@ -299,7 +328,6 @@ function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(st
 let state = loadState();
 let editingId = null;
 
-// 获取当前项目
 function getCurrentProject() {
   let proj = state.projects.find(p => p.id === state.currentProjectId);
   if (!proj) {
@@ -329,32 +357,6 @@ themeBtn.onclick = () => {
 };
 
 /* =========================================================
-   项目选择器渲染与事件
-   ========================================================= */
-const projectSelect = document.getElementById('projectSelect');
-function renderProjectSelect() {
-  projectSelect.innerHTML = state.projects.map(p => 
-    `<option value="${p.id}" ${p.id === state.currentProjectId ? 'selected' : ''}>${esc(p.name)}</option>`
-  ).join('');
-}
-projectSelect.onchange = (e) => {
-  state.currentProjectId = e.target.value;
-  saveState();
-  render();
-};
-
-document.getElementById('addProjectBtn').onclick = () => {
-  const name = prompt('请输入新项目名称', '新项目');
-  if (name === null) return;
-  const newProj = { id: uid(), name: name.trim() || '未命名项目', tasks: [] };
-  state.projects.push(newProj);
-  state.currentProjectId = newProj.id;
-  saveState();
-  renderProjectSelect();
-  render();
-};
-
-/* =========================================================
    核心渲染逻辑
    ========================================================= */
 function getDaysBetween(d1, d2) { return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)); }
@@ -367,7 +369,7 @@ function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&
 function render() {
   const currentProj = getCurrentProject();
   if (!currentProj) {
-    document.getElementById('taskSidebar').innerHTML = '<div class="sidebar-header">任务列表</div><div style="padding:20px;font-size:12px;color:#888;">请先点击上方“新建项目”</div>';
+    document.getElementById('taskSidebar').innerHTML = '<div class="sidebar-header">任务列表</div><div style="padding:20px;font-size:12px;color:#888;">请先点击上方“＋ 项目”</div>';
     document.getElementById('timelineHeader').innerHTML = '';
     document.querySelectorAll('.task-row').forEach(r => r.remove());
     return;
@@ -396,27 +398,20 @@ function render() {
   const totalDays = getDaysBetween(minDate, maxDate);
   const cellWidth = window.innerWidth <= 768 ? 30 : 40;
 
-  // 左侧任务列表
+  // 1. 左侧任务列表（极简：只保留任务名和负责人）
   const sidebar = document.getElementById('taskSidebar');
   let sidebarHTML = '<div class="sidebar-header">任务列表</div>';
   currentProj.tasks.forEach((task) => {
-    const start = new Date(task.start); const end = new Date(task.end);
-    const days = getDaysBetween(start, end) + 1;
-    const msCount = (task.milestones || []).length;
     sidebarHTML += `
       <div class="task-item" data-id="${task.id}" style="border-left: 4px solid ${task.color}">
-        <div class="task-name">${esc(task.name)} <span style="font-weight:400; font-size:11px; color:var(--muted)">${task.progress}%</span></div>
-        <div class="task-meta">
-          <span>${task.owner || '未分配'}</span>
-          <span>${formatDate(start).slice(5)} ~ ${formatDate(end).slice(5)} (${days}天)</span>
-          ${msCount > 0 ? `<span style="color:var(--accent)">◆ ${msCount}个节点</span>` : ''}
-        </div>
+        <div class="task-name">${esc(task.name)}</div>
+        <div class="task-owner">${esc(task.owner || '未分配')}</div>
       </div>
     `;
   });
   sidebar.innerHTML = sidebarHTML;
 
-  // 时间轴
+  // 2. 时间轴
   const header = document.getElementById('timelineHeader');
   let headerHTML = '';
   for (let i = 0; i < totalDays; i++) {
@@ -522,7 +517,7 @@ function render() {
     canvas.appendChild(row);
   });
 
-  // 绘制依赖线
+  // 3. 绘制依赖线 (A → B)
   currentProj.tasks.forEach(task => {
     if (!task.dependencyId) return;
     const preId = task.dependencyId;
@@ -650,7 +645,7 @@ function openModal(title, task = null) {
 function closeModal() { overlay.classList.remove('show'); editingId = null; }
 
 document.getElementById('addTaskBtn').onclick = () => {
-  if (!getCurrentProject()) return alert('请先点击“＋ 新建项目”创建一个项目');
+  if (!getCurrentProject()) return alert('请先点击“＋ 项目”创建一个项目');
   openModal('新建任务');
 };
 document.getElementById('mCancel').onclick = closeModal;
@@ -700,24 +695,118 @@ function openEdit(id) {
 }
 
 /* =========================================================
-   导出 Excel
+   独立添加节点弹窗（追踪客户节点）
    ========================================================= */
-document.getElementById('exportBtn').onclick = () => {
+const nodeOverlay = document.getElementById('nodeOverlay');
+const nodeTaskSelect = document.getElementById('nodeTaskSelect');
+const nodeName = document.getElementById('nodeName');
+const nodeDate = document.getElementById('nodeDate');
+
+document.getElementById('addNodeBtn').onclick = () => {
   const currentProj = getCurrentProject();
-  if (!currentProj) return alert('无数据可导出');
-  let csvContent = `\uFEFF[${currentProj.name}] 任务名称,阶段1开始,阶段1结束,阶段2开始,阶段2结束,负责人,进度,颜色,前置任务,关键节点\n`;
-  currentProj.tasks.forEach(t => {
-    const preName = currentProj.tasks.find(x => x.id === t.dependencyId)?.name || '无';
-    const msText = (t.milestones || []).map(m => `${m.name}(${m.date})`).join('; ');
-    csvContent += [`"${t.name}"`, `"${t.start}"`, `"${t.end}"`, `"${t.start2}"`, `"${t.end2}"`, `"${t.owner}"`, `"${t.progress}%"`, `"${t.color}"`, `"${preName}"`, `"${msText}"`].join(",") + "\n";
-  });
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `${currentProj.name}_排期.csv`; link.click(); URL.revokeObjectURL(link.href);
+  if (!currentProj || currentProj.tasks.length === 0) return alert('请先创建至少一个任务');
+  
+  nodeTaskSelect.innerHTML = currentProj.tasks.map(t => 
+    `<option value="${t.id}">${esc(t.name)}</option>`
+  ).join('');
+  
+  nodeName.value = '';
+  nodeDate.value = formatDate(new Date());
+  nodeOverlay.classList.add('show');
+  setTimeout(() => nodeName.focus(), 30);
+};
+
+document.getElementById('nodeCancel').onclick = () => nodeOverlay.classList.remove('show');
+nodeOverlay.addEventListener('click', e => { if (e.target === nodeOverlay) nodeOverlay.classList.remove('show'); });
+
+document.getElementById('nodeSave').onclick = () => {
+  const currentProj = getCurrentProject();
+  const taskId = nodeTaskSelect.value;
+  const name = nodeName.value.trim();
+  const date = nodeDate.value;
+
+  if (!name) { alert('请输入节点名称'); return; }
+  if (!date) { alert('请选择节点日期'); return; }
+
+  const task = currentProj.tasks.find(t => t.id === taskId);
+  if (task) {
+    if (!task.milestones) task.milestones = [];
+    task.milestones.push({ name, date });
+    nodeOverlay.classList.remove('show');
+    render();
+    saveState();
+    alert('✅ 节点已添加！');
+  }
+};
+
+/* =========================================================
+   项目选择器
+   ========================================================= */
+const projectSelect = document.getElementById('projectSelect');
+function renderProjectSelect() {
+  projectSelect.innerHTML = state.projects.map(p => 
+    `<option value="${p.id}" ${p.id === state.currentProjectId ? 'selected' : ''}>${esc(p.name)}</option>`
+  ).join('');
+}
+projectSelect.onchange = (e) => {
+  state.currentProjectId = e.target.value;
+  saveState(); render();
+};
+document.getElementById('addProjectBtn').onclick = () => {
+  const name = prompt('请输入新项目名称', '新项目');
+  if (name === null) return;
+  const newProj = { id: uid(), name: name.trim() || '未命名项目', tasks: [] };
+  state.projects.push(newProj);
+  state.currentProjectId = newProj.id;
+  saveState(); renderProjectSelect(); render();
+};
+
+/* =========================================================
+   备份与导入（JSON）
+   ========================================================= */
+document.getElementById('backupBtn').onclick = () => {
+  const dataStr = JSON.stringify(state, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `Empower项目排期_备份_${new Date().toISOString().slice(0,10)}.json`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
+const importFileInput = document.getElementById('importFileInput');
+document.getElementById('importBtn').onclick = () => importFileInput.click();
+
+importFileInput.onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const importedData = JSON.parse(ev.target.result);
+      if (importedData && Array.isArray(importedData.projects)) {
+        if (confirm('导入会覆盖当前所有项目数据，确定吗？')) {
+          state = importedData;
+          if (!state.currentProjectId || !state.projects.some(p => p.id === state.currentProjectId)) {
+            state.currentProjectId = state.projects[0]?.id;
+          }
+          saveState(); renderProjectSelect(); render();
+          alert('✅ 数据导入成功！');
+        }
+      } else {
+        alert('❌ 文件格式错误：这不是有效的项目排期备份文件。');
+      }
+    } catch (err) { alert('❌ 读取失败：文件可能已损坏。'); }
+  };
+  reader.readAsText(file);
+  importFileInput.value = '';
 };
 
 document.getElementById('resetBtn').onclick = () => {
-  if (!confirm('确定清空所有项目数据并恢复示例吗？')) return;
-  state = defaultData(); state.currentProjectId = state.projects[0].id; renderProjectSelect(); render(); saveState();
+  if (!confirm('确定清空所有数据并恢复示例吗？')) return;
+  state = defaultData();
+  state.currentProjectId = state.projects[0].id;
+  renderProjectSelect(); render(); saveState();
 };
 
 let resizeTimer;
