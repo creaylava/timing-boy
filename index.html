@@ -179,7 +179,6 @@
   .milestone-item select { width: 60px; padding: 4px 6px; font-size: 11px; }
   .milestone-item .remove-ms { color: #d0453a; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; }
 
-  /* 同步弹窗 */
   .sync-status {
     padding: 10px 12px; border-radius: 10px; font-size: 12px;
     background: var(--input-bg); border: 1px solid var(--border);
@@ -289,8 +288,7 @@
     <div class="m-title">⚙️ 设置</div>
     <div style="display:flex; flex-direction:column; gap:8px;">
       <button class="btn" id="exportBtn">📊 导出 Excel（CSV）</button>
-      <button class="btn" id="backupdiv class="field">
-     Btn">📥 备份 JSON</button>
+      <button class="btn" id="backupBtn">📥 备份 JSON</button>
       <button class="btn" id="importBtn">📤 导入 JSON</button>
       <input type="file" id="importFileInput" accept=".json" style="display:none;">
       <button class="btn danger" id="resetBtn">⚠️ 重置全部数据</button>
@@ -308,7 +306,8 @@
 
     <div class="sync-status" id="syncStatusBox">检查配置...</div>
 
-    < <label>GitHub Token（只存在本机）</label>
+    <div class="field">
+      <label>GitHub Token（只存在本机）</label>
       <input type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxx 或 github_pat_xxx">
       <div class="help-text">
         去 <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a>
@@ -388,9 +387,12 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('empower-plan-v6');
     if (raw) {
       const d = JSON.parse(raw);
-      if (d && d.projects && d.projects.length > 0) {
-        if (!d.currentProjectId) d.currentProjectId = d.projects[0].id;
+      if (d && Array.isArray(d.projects) && d.projects.length > 0) {
+        if (!d.currentProjectId || !d.projects.some(p => p.id === d.currentProjectId)) {
+          d.currentProjectId = d.projects[0].id;
+        }
         d.projects.forEach(p => {
+          if (!p.tasks) p.tasks = [];
           p.tasks.forEach(t => {
             if (t.phases) {
               t.phases.forEach((ph, i) => { if (!ph.name) ph.name = `阶段${i+1}`; });
@@ -403,7 +405,7 @@ function loadState() {
         return d;
       }
     }
-  } catch (e) {}
+  } catch (e) { console.error('loadState 出错：', e); }
   const def = defaultData();
   def.currentProjectId = def.projects[0].id;
   return def;
@@ -417,7 +419,19 @@ function saveState() {
 let state = loadState();
 let editingId = null;
 
+// ★ 关键修复：如果 projects 为空，自动恢复默认数据
+function ensureProjects() {
+  if (!state.projects || state.projects.length === 0) {
+    console.warn('检测到项目列表为空，自动恢复默认数据');
+    const def = defaultData();
+    state.projects = def.projects;
+    state.currentProjectId = def.projects[0].id;
+    saveState();
+  }
+}
+
 function getCurrentProject() {
+  ensureProjects();
   let proj = state.projects.find(p => p.id === state.currentProjectId);
   if (!proj) { proj = state.projects[0]; if (proj) state.currentProjectId = proj.id; }
   return proj;
@@ -533,6 +547,7 @@ async function pullFromCloud(opts = {}) {
     }
     _isPushing = true;
     state = cloudData;
+    ensureProjects();
     if (!state.currentProjectId || !state.projects.some(p => p.id === state.currentProjectId)) {
       state.currentProjectId = state.projects[0].id;
     }
@@ -583,13 +598,14 @@ function getWeekNumber(d) {
 }
 
 function render() {
+  ensureProjects();
   const currentProj = getCurrentProject();
   if (!currentProj) return;
 
   const today = new Date(); today.setHours(0,0,0,0);
   let minDate = new Date(2099,0,1), maxDate = new Date(2000,0,1);
   
-  if (currentProj.tasks.length > 0) {
+  if (currentProj.tasks && currentProj.tasks.length > 0) {
     currentProj.tasks.forEach(t => {
       (t.phases || []).forEach(p => {
         if (p.start && new Date(p.start) < minDate) minDate = new Date(p.start);
@@ -612,10 +628,9 @@ function render() {
   const totalDays = getDaysBetween(minDate, maxDate);
   const cellWidth = window.innerWidth <= 768 ? 30 : 40;
 
-  // 左侧列表
   const sidebar = document.getElementById('taskSidebar');
   let sidebarHTML = '<div class="sidebar-header">任务列表</div>';
-  currentProj.tasks.forEach((task, idx) => {
+  (currentProj.tasks || []).forEach((task, idx) => {
     const nodeCount = (task.milestones || []).length;
     const isFirst = idx === 0;
     const isLast = idx === currentProj.tasks.length - 1;
@@ -635,7 +650,6 @@ function render() {
   });
   sidebar.innerHTML = sidebarHTML;
 
-  // 时间轴
   const weekHeader = document.getElementById('timelineWeekHeader');
   const dayHeader = document.getElementById('timelineDayHeader');
   let weekHTML = '', dayHTML = '';
@@ -661,7 +675,6 @@ function render() {
   weekHeader.innerHTML = weekHTML;
   dayHeader.innerHTML = dayHTML;
 
-  // 右侧甘特图
   document.querySelectorAll('.task-row').forEach(r => r.remove());
   const svgLayer = document.getElementById('dependencyLayer');
   svgLayer.innerHTML = '';
@@ -670,7 +683,7 @@ function render() {
   const taskGeometry = {};
   let currentY = 74;
 
-  currentProj.tasks.forEach((task) => {
+  (currentProj.tasks || []).forEach((task) => {
     const rowEl = document.createElement('div');
     rowEl.className = 'task-row'; rowEl.dataset.id = task.id;
     rowEl.style.height = '60px';
@@ -741,7 +754,6 @@ function render() {
 
   canvas.style.height = (currentY + 20) + 'px';
 
-  // 依赖箭头
   currentProj.tasks.forEach(task => {
     if (!task.dependencyId) return;
     const preGeo = taskGeometry[task.dependencyId];
@@ -769,7 +781,6 @@ function render() {
     svgLayer.appendChild(arrow);
   });
 
-  // 左侧高亮
   document.querySelectorAll('.task-item').forEach(el => {
     el.addEventListener('click', (e) => {
       if (e.target.closest('.move-btn')) return;
@@ -1003,6 +1014,7 @@ function openEditTask(id) {
    ========================================================= */
 const projectSelect = document.getElementById('projectSelect');
 function renderProjectSelect() {
+  ensureProjects();
   projectSelect.innerHTML = state.projects.map(p => `<option value="${p.id}" ${p.id === state.currentProjectId ? 'selected' : ''}>${esc(p.name)}</option>`).join('');
 }
 projectSelect.onchange = (e) => {
@@ -1036,16 +1048,9 @@ document.getElementById('exportBtn').onclick = () => {
     const msStr = (t.milestones || []).map(m => `${m.name}(${m.date},${m.type})`).join('; ');
     const clean = s => String(s || '').replace(/"/g, '""');
     csv += [
-      `"${clean(t.name)}"`,
-      `"${clean(phaseStr)}"`,
-      `""`,
-      `""`,
-      `"${clean(t.owner)}"`,
-      `"${t.progress}%"`,
-      `"${clean(preName)}"`,
-      `"${clean(msStr)}"`,
-      `""`,
-      `""`
+      `"${clean(t.name)}"`, `"${clean(phaseStr)}"`, `""`, `""`,
+      `"${clean(t.owner)}"`, `"${t.progress}%"`, `"${clean(preName)}"`,
+      `"${clean(msStr)}"`, `""`, `""`
     ].join(',') + '\n';
   });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1078,6 +1083,7 @@ importFileInput.onchange = (e) => {
       if (importedData && Array.isArray(importedData.projects)) {
         if (confirm('导入会覆盖当前所有项目数据，确定吗？')) {
           state = importedData;
+          ensureProjects();
           if (!state.currentProjectId || !state.projects.some(p => p.id === state.currentProjectId)) {
             state.currentProjectId = state.projects[0]?.id;
           }
@@ -1111,7 +1117,7 @@ document.getElementById('resetBtn').onclick = () => {
 };
 
 /* =========================================================
-   GitHub 同步 UI
+   GitHub 同步 UI（加了容错）
    ========================================================= */
 const syncOverlay = document.getElementById('syncOverlay');
 const ghTokenInput = document.getElementById('ghTokenInput');
@@ -1119,17 +1125,22 @@ const ghGistInput = document.getElementById('ghGistInput');
 const autoSyncCheck = document.getElementById('autoSyncCheck');
 
 document.getElementById('syncBtn').onclick = () => {
-  ghTokenInput.value = ghToken;
-  ghGistInput.value = ghGistId;
-  autoSyncCheck.checked = autoSyncEnabled;
-  if (!ghToken || !ghGistId) {
-    setSyncStatus('ℹ️ 首次使用，请按下面的说明配置：\n1. 生成 GitHub Token（只需 gist 权限）\n2. 创建一个 Gist，文件名 plan.json，内容 {}\n3. 把 Token 和 Gist ID 填进来，点「保存配置」\n4. 点「推送」上传当前数据', 'info');
-  } else if (_lastSyncTime) {
-    setSyncStatus('✅ 上次同步：' + _lastSyncTime.toLocaleString(), 'ok');
-  } else {
-    setSyncStatus('ℹ️ 已配置。可点「测试连接」验证，或直接「推送」。', 'info');
+  try {
+    ghTokenInput.value = ghToken;
+    ghGistInput.value = ghGistId;
+    autoSyncCheck.checked = autoSyncEnabled;
+    if (!ghToken || !ghGistId) {
+      setSyncStatus('ℹ️ 首次使用，请按下面的说明配置：\n1. 生成 GitHub Token（只需 gist 权限）\n2. 创建一个 Gist，文件名 plan.json，内容 {}\n3. 把 Token 和 Gist ID 填进来，点「保存配置」\n4. 点「推送」上传当前数据', 'info');
+    } else if (_lastSyncTime) {
+      setSyncStatus('✅ 上次同步：' + _lastSyncTime.toLocaleString(), 'ok');
+    } else {
+      setSyncStatus('ℹ️ 已配置。可点「测试连接」验证，或直接「推送」。', 'info');
+    }
+    syncOverlay.classList.add('show');
+  } catch (e) {
+    console.error('打开同步弹窗失败：', e);
+    alert('打开同步弹窗失败：' + e.message);
   }
-  syncOverlay.classList.add('show');
 };
 
 document.getElementById('syncCloseBtn').onclick = () => syncOverlay.classList.remove('show');
@@ -1179,8 +1190,19 @@ document.getElementById('syncPullBtn').onclick = () => {
 /* =========================================================
    初始化
    ========================================================= */
-renderProjectSelect();
-render();
+try {
+  ensureProjects();
+  renderProjectSelect();
+  render();
+} catch (e) {
+  console.error('初始化失败：', e);
+  alert('初始化失败，将重置数据：' + e.message);
+  state = defaultData();
+  state.currentProjectId = state.projects[0].id;
+  saveState();
+  renderProjectSelect();
+  render();
+}
 </script>
 </body>
 </html>
