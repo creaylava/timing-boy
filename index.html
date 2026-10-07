@@ -38,12 +38,13 @@
   .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
   .btn.primary:hover{opacity:.9;}
   .btn.danger{color:#d0453a; border-color:#f0cfcc;}
-  .btn.icon{padding:5px 8px;}
+  .btn.icon{padding:5px 8px; font-size:14px;}
   .btn.small{padding:4px 6px; font-size:10px;}
   .project-selector {
     padding:5px 8px; border:1px solid var(--border); border-radius:6px;
-    background:var(--input-bg); color:var(--text); font-size:11px; outline:none; max-width:110px; font-family:inherit;
+    background:var(--input-bg); color:var(--text); font-size:11px; outline:none; max-width:130px; font-family:inherit;
   }
+  .spacer{flex:1;}
 
   .planner-container { flex:1; display:flex; overflow:hidden; position:relative; }
   .task-sidebar {
@@ -57,16 +58,25 @@
     background: var(--card-bg); position: sticky; top: 0; z-index: 6;
   }
   .task-item {
-    height: 60px; display: flex; align-items: center; padding: 0 10px 0 12px;
+    height: 60px; display: flex; align-items: center; padding: 0 8px 0 12px;
     border-bottom: 1px solid var(--border); font-size: 12px; transition: background 0.15s;
-    cursor: pointer;
+    cursor: pointer; gap: 6px;
   }
   .task-item:hover { background: var(--input-bg); }
   .task-item.active { background: rgba(200,102,47,.1); border-left: 4px solid var(--accent); }
   .task-info { flex: 1; min-width: 0; }
   .task-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .task-owner { font-size: 10px; color: var(--muted); margin-top: 3px; }
-  .task-node-count { font-size: 10px; color: var(--accent); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .task-node-count { font-size: 10px; color: var(--accent); margin-top: 2px; }
+  .task-move-btns { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+  .move-btn {
+    background: rgba(100,100,100,.08); color: var(--muted); border: none;
+    width: 20px; height: 20px; border-radius: 4px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; transition: .15s;
+  }
+  .move-btn:hover:not(:disabled) { background: var(--accent); color: #fff; }
+  .move-btn:disabled { opacity: 0.3; cursor: not-allowed; background: transparent; }
 
   .gantt-viewport { flex: 1; overflow: auto; position: relative; background: var(--bg); }
   .gantt-canvas { display: flex; flex-direction: column; min-width: max-content; position: relative; }
@@ -120,11 +130,10 @@
   .task-bar:hover { transform: scaleY(1.15); box-shadow: 0 2px 6px rgba(0,0,0,.3); z-index: 10; }
   .task-bar .bar-text { position: relative; z-index: 3; text-shadow: 0 1px 2px rgba(0,0,0,.6); overflow: hidden; text-overflow: ellipsis; }
 
-  /* 节点菱形 */
   .node-marker {
     position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(45deg);
     width: 10px; height: 10px; background: #fff; border: 2px solid #333;
-    z-index: 6; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.4);
+    z-index: 5; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.4);
     transition: transform 0.2s; pointer-events: auto;
   }
   .node-marker:hover { transform: translate(-50%, -50%) rotate(45deg) scale(1.5); z-index: 20; }
@@ -137,34 +146,6 @@
     font-family: sans-serif; z-index: 100;
   }
   .node-marker:hover::after { display: block; }
-
-  /* 新增：节点名字直接显示 */
-  .node-label {
-    position: absolute;
-    transform: translateX(-50%);
-    font-size: 9px;
-    color: #333;
-    background: rgba(255,255,255,.9);
-    padding: 1px 4px;
-    border-radius: 3px;
-    white-space: nowrap;
-    z-index: 7;
-    pointer-events: none;
-    max-width: 90px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    border: 1px solid rgba(0,0,0,.08);
-    font-weight: 600;
-  }
-  body.dark .node-label {
-    color: #e0e0e0;
-    background: rgba(30,30,30,.95);
-    border-color: rgba(255,255,255,.1);
-  }
-  .node-label.customer { color: var(--customer-color); }
-  .node-label.internal { color: var(--internal-color); }
-  body.dark .node-label.customer { color: var(--customer-color); }
-  body.dark .node-label.internal { color: var(--internal-color); }
 
   .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; }
   .overlay.show{display:flex;}
@@ -198,8 +179,24 @@
   .milestone-item select { width: 60px; padding: 4px 6px; font-size: 11px; }
   .milestone-item .remove-ms { color: #d0453a; background: none; border: none; font-size: 16px; cursor: pointer; padding: 0 4px; }
 
+  /* 同步弹窗 */
+  .sync-status {
+    padding: 10px 12px; border-radius: 10px; font-size: 12px;
+    background: var(--input-bg); border: 1px solid var(--border);
+    margin-bottom: 14px; line-height: 1.6; white-space: pre-wrap;
+  }
+  .sync-status.ok { border-color: #22c55e; background: rgba(34,197,94,.08); color: #22c55e; }
+  .sync-status.err { border-color: #ef4444; background: rgba(239,68,68,.08); color: #ef4444; }
+  .sync-status.info { border-color: var(--accent); background: rgba(200,102,47,.06); color: var(--accent); }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+  .checkbox-row input[type="checkbox"] { width: auto; }
+  .checkbox-row label { margin: 0; font-size: 13px; color: var(--text); cursor: pointer; }
+  .help-text { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+  .help-text code { background: var(--input-bg); padding: 1px 5px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 10px; }
+  .help-text a { color: var(--accent); }
+
   @media (max-width: 768px) {
-    .task-sidebar { width: 160px; }
+    .task-sidebar { width: 180px; }
     .task-name { font-size: 11px; }
     .task-owner { font-size: 9px; }
     .timeline-week-cell { font-size: 8px; }
@@ -207,9 +204,8 @@
     .grid-cell { width: 30px; }
     .task-bar { font-size: 9px; padding: 0 3px; height: 14px; }
     .node-marker { width: 8px; height: 8px; border-width: 2px !important; }
-    .node-label { font-size: 8px; max-width: 70px; padding: 0 3px; }
     header h1 { display: none; }
-    .project-selector { width: 80px; font-size: 10px; }
+    .project-selector { width: 100px; font-size: 11px; }
     .btn { padding: 4px 6px; font-size: 10px; }
   }
 </style>
@@ -221,12 +217,10 @@
   <select class="project-selector" id="projectSelect"></select>
   <button class="btn small" id="addProjectBtn">＋ 项目</button>
   <button class="btn primary small" id="addTaskBtn">＋ 任务</button>
-  <div style="flex:1"></div>
-  <button class="btn small" id="backupBtn">📥 备份JSON</button>
-  <button class="btn small" id="importBtn">📤 导入JSON</button>
-  <input type="file" id="importFileInput" accept=".json" style="display:none;">
+  <div class="spacer"></div>
+  <button class="btn icon" id="syncBtn" title="GitHub 同步">☁️</button>
+  <button class="btn icon" id="settingsBtn" title="设置">⚙️</button>
   <button class="btn icon" id="themeToggle" title="切换深色/浅色">🌙</button>
-  <button class="btn danger small" id="resetBtn">重置</button>
 </header>
 
 <div class="planner-container">
@@ -289,10 +283,76 @@
   </div>
 </div>
 
+<!-- 设置弹窗 -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal" style="max-width:400px;">
+    <div class="m-title">⚙️ 设置</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <button class="btn" id="exportBtn">📊 导出 Excel（CSV）</button>
+      <button class="btn" id="backupdiv class="field">
+     Btn">📥 备份 JSON</button>
+      <button class="btn" id="importBtn">📤 导入 JSON</button>
+      <input type="file" id="importFileInput" accept=".json" style="display:none;">
+      <button class="btn danger" id="resetBtn">⚠️ 重置全部数据</button>
+    </div>
+    <div class="modal-actions" style="margin-top:14px;">
+      <button class="btn" id="settingsCloseBtn" style="flex:1;">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- GitHub 同步弹窗 -->
+<div class="overlay" id="syncOverlay">
+  <div class="modal" style="max-width:480px;">
+    <div class="m-title">☁️ GitHub 同步</div>
+
+    <div class="sync-status" id="syncStatusBox">检查配置...</div>
+
+    < <label>GitHub Token（只存在本机）</label>
+      <input type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxx 或 github_pat_xxx">
+      <div class="help-text">
+        去 <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a>
+        生成 <b>Classic token</b>，只需勾选 <code>gist</code> 权限。
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Gist ID</label>
+      <input type="text" id="ghGistInput" placeholder="例如 a1b2c3d4e5f6...">
+      <div class="help-text">
+        <b>首次使用：</b>去 <a href="https://gist.github.com" target="_blank">gist.github.com</a> 创建 <b>Secret</b> Gist，
+        文件名填 <code>plan.json</code>，内容填 <code>{}</code>。地址栏最后一段就是 Gist ID。
+      </div>
+    </div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="autoSyncCheck">
+      <label for="autoSyncCheck">自动同步（每次修改后 3 秒自动上传）</label>
+    </div>
+
+    <div class="modal-actions" style="margin-top:10px;">
+      <button class="btn" id="testConnBtn">🔌 测试连接</button>
+      <button class="btn" id="syncPullBtn">⬇️ 拉取</button>
+      <button class="btn primary" id="syncPushBtn">⬆️ 推送</button>
+    </div>
+    <div class="modal-actions" style="margin-top:8px;">
+      <button class="btn" id="syncSaveConfigBtn" style="flex:1;">💾 保存配置</button>
+      <button class="btn" id="syncCloseBtn" style="flex:1;">关闭</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const STORAGE_KEY = 'empower-plan-v6';
+/* =========================================================
+   数据层
+   ========================================================= */
+const STORAGE_KEY = 'empower-plan-v7';
 const THEME_KEY = 'empower-plan-theme';
+const GH_TOKEN_KEY = 'empower-plan-gh-token';
+const GH_GIST_KEY = 'empower-plan-gh-gist';
+const AUTO_SYNC_KEY = 'empower-plan-auto-sync';
 const uid = () => Math.random().toString(36).slice(2, 10);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function defaultData() {
   const today = new Date();
@@ -325,9 +385,9 @@ function defaultData() {
 
 function loadState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) { 
-      const d = JSON.parse(raw); 
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('empower-plan-v6');
+    if (raw) {
+      const d = JSON.parse(raw);
       if (d && d.projects && d.projects.length > 0) {
         if (!d.currentProjectId) d.currentProjectId = d.projects[0].id;
         d.projects.forEach(p => {
@@ -340,7 +400,7 @@ function loadState() {
             }
           });
         });
-        return d; 
+        return d;
       }
     }
   } catch (e) {}
@@ -348,7 +408,11 @@ function loadState() {
   def.currentProjectId = def.projects[0].id;
   return def;
 }
-function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { alert('存储空间不足！'); } }
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  if (autoSyncEnabled) schedulePush();
+}
 
 let state = loadState();
 let editingId = null;
@@ -359,6 +423,135 @@ function getCurrentProject() {
   return proj;
 }
 
+/* =========================================================
+   GitHub 同步
+   ========================================================= */
+let ghToken = localStorage.getItem(GH_TOKEN_KEY) || '';
+let ghGistId = localStorage.getItem(GH_GIST_KEY) || '';
+let autoSyncEnabled = localStorage.getItem(AUTO_SYNC_KEY) === '1';
+let _isPushing = false;
+let _pushTimer = null;
+let _lastSyncTime = null;
+
+function setSyncStatus(msg, type) {
+  const box = document.getElementById('syncStatusBox');
+  if (!box) return;
+  box.textContent = msg;
+  box.className = 'sync-status ' + (type || '');
+}
+
+function schedulePush() {
+  if (_pushTimer) clearTimeout(_pushTimer);
+  _pushTimer = setTimeout(() => { pushToCloud({ silent: true }); }, 3000);
+}
+
+async function ghFetchGist() {
+  const res = await fetch(`https://api.github.com/gists/${ghGistId}`, {
+    headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github+json' }
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`HTTP ${res.status}: ${txt.slice(0, 150)}`);
+  }
+  return res.json();
+}
+
+async function ghUpdateGist(content) {
+  const res = await fetch(`https://api.github.com/gists/${ghGistId}`, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `token ${ghToken}`,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ files: { 'plan.json': { content: content } } })
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`HTTP ${res.status}: ${txt.slice(0, 150)}`);
+  }
+  return res.json();
+}
+
+async function testConnection() {
+  if (!ghToken || !ghGistId) { setSyncStatus('❌ 请先填写 Token 和 Gist ID', 'err'); return false; }
+  try {
+    setSyncStatus('🔌 正在测试连接...', 'info');
+    const gist = await ghFetchGist();
+    const file = gist.files && gist.files['plan.json'];
+    if (!file) {
+      setSyncStatus('⚠️ 连接成功，但 Gist 里没有 plan.json 文件。请检查文件名。', 'info');
+      return false;
+    }
+    setSyncStatus(`✅ 连接成功！\n文件大小：${file.size} 字节\n最后更新：${new Date(gist.updated_at).toLocaleString()}`, 'ok');
+    return true;
+  } catch (e) {
+    setSyncStatus('❌ 连接失败：' + e.message, 'err');
+    return false;
+  }
+}
+
+async function pushToCloud(opts = {}) {
+  if (!ghToken || !ghGistId) {
+    if (!opts.silent) setSyncStatus('❌ 请先填写 Token 和 Gist ID', 'err');
+    return;
+  }
+  try {
+    _isPushing = true;
+    setSyncStatus('⏫ 上传中...', 'info');
+    const content = JSON.stringify(state, null, 2);
+    await ghUpdateGist(content);
+    _lastSyncTime = new Date();
+    setSyncStatus('✅ 已上传到 GitHub（' + _lastSyncTime.toLocaleTimeString() + '）', 'ok');
+  } catch (e) {
+    console.error(e);
+    setSyncStatus('❌ 上传失败：' + e.message, 'err');
+    if (!opts.silent) alert('上传失败：' + e.message);
+  } finally {
+    setTimeout(() => { _isPushing = false; }, 500);
+  }
+}
+
+async function pullFromCloud(opts = {}) {
+  if (!ghToken || !ghGistId) {
+    if (!opts.silent) setSyncStatus('❌ 请先填写 Token 和 Gist ID', 'err');
+    return;
+  }
+  try {
+    setSyncStatus('⏬ 拉取中...', 'info');
+    const gist = await ghFetchGist();
+    const file = gist.files && gist.files['plan.json'];
+    if (!file) { setSyncStatus('⚠️ Gist 里没有 plan.json 文件', 'err'); return; }
+    const raw = file.content || '';
+    if (!raw.trim() || raw.trim() === '{}') {
+      setSyncStatus('ℹ️ 云端还是空的（plan.json 内容是 {}），请先点「推送」上传。', 'info');
+      return;
+    }
+    const cloudData = JSON.parse(raw);
+    if (!cloudData.projects || !Array.isArray(cloudData.projects)) {
+      throw new Error('云端数据格式不对（不是排期数据）');
+    }
+    _isPushing = true;
+    state = cloudData;
+    if (!state.currentProjectId || !state.projects.some(p => p.id === state.currentProjectId)) {
+      state.currentProjectId = state.projects[0].id;
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    renderProjectSelect();
+    render();
+    setTimeout(() => { _isPushing = false; }, 500);
+    _lastSyncTime = new Date();
+    setSyncStatus('✅ 已从 GitHub 同步（' + _lastSyncTime.toLocaleTimeString() + '）', 'ok');
+  } catch (e) {
+    console.error(e);
+    setSyncStatus('❌ 拉取失败：' + e.message, 'err');
+    if (!opts.silent) alert('拉取失败：' + e.message);
+  }
+}
+
+/* =========================================================
+   主题切换
+   ========================================================= */
 const themeBtn = document.getElementById('themeToggle');
 function applyTheme(theme) {
   if (theme === 'dark') { document.body.classList.add('dark'); themeBtn.textContent = '☀️'; }
@@ -374,12 +567,14 @@ themeBtn.onclick = () => {
   applyTheme(t); localStorage.setItem(THEME_KEY, t);
 };
 
+/* =========================================================
+   核心渲染
+   ========================================================= */
 function getDaysBetween(d1, d2) { return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)); }
 function formatDate(date) {
   const y = date.getFullYear(); const m = String(date.getMonth() + 1).padStart(2, '0'); const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
-function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function getWeekNumber(d) {
   d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
@@ -387,9 +582,6 @@ function getWeekNumber(d) {
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
-/* =========================================================
-   渲染
-   ========================================================= */
 function render() {
   const currentProj = getCurrentProject();
   if (!currentProj) return;
@@ -423,16 +615,20 @@ function render() {
   // 左侧列表
   const sidebar = document.getElementById('taskSidebar');
   let sidebarHTML = '<div class="sidebar-header">任务列表</div>';
-  currentProj.tasks.forEach((task) => {
+  currentProj.tasks.forEach((task, idx) => {
     const nodeCount = (task.milestones || []).length;
-    // 显示所有节点名字（用 / 分隔）
-    const nodeNames = (task.milestones || []).map(m => m.name).join(' / ');
+    const isFirst = idx === 0;
+    const isLast = idx === currentProj.tasks.length - 1;
     sidebarHTML += `
       <div class="task-item" data-id="${task.id}" style="border-left: 4px solid ${task.color}">
         <div class="task-info">
           <div class="task-name">${esc(task.name)}</div>
           <div class="task-owner">${esc(task.owner || '未分配')}</div>
-          ${nodeCount > 0 ? `<div class="task-node-count" title="${esc(nodeNames)}">◆ ${esc(nodeNames)}</div>` : ''}
+          ${nodeCount > 0 ? `<div class="task-node-count">◆ ${nodeCount} 个节点</div>` : ''}
+        </div>
+        <div class="task-move-btns">
+          <button class="move-btn" data-act="move-task-up" data-id="${task.id}" ${isFirst ? 'disabled' : ''}>↑</button>
+          <button class="move-btn" data-act="move-task-down" data-id="${task.id}" ${isLast ? 'disabled' : ''}>↓</button>
         </div>
       </div>
     `;
@@ -490,7 +686,6 @@ function render() {
     bgHTML += '</div>';
     rowEl.innerHTML = bgHTML;
 
-    // 绘制阶段
     const phases = task.phases || [];
     let maxRight = 0;
     let firstStartX = -1;
@@ -505,7 +700,7 @@ function render() {
 
       const bar = document.createElement('div');
       bar.className = 'task-bar';
-      bar.style.top = `${4 + idx * 18}px`;
+      bar.style.top = `${6 + idx * 18}px`;
       bar.style.left = `${visibleOffset * cellWidth}px`;
       bar.style.width = `${visibleDuration * cellWidth}px`;
       bar.style.background = task.color;
@@ -518,29 +713,18 @@ function render() {
       rowEl.appendChild(bar);
     });
 
-    // 节点：菱形 + 名字直接显示
     (task.milestones || []).forEach(ms => {
       const msDate = new Date(ms.date);
       if (isNaN(msDate)) return;
       const msOffsetDays = getDaysBetween(minDate, msDate);
       if (msOffsetDays >= 0 && msOffsetDays <= totalDays) {
-        const isCustomer = ms.type === 'customer' || !ms.type;
-        
-        // 菱形
         const marker = document.createElement('div');
+        const isCustomer = ms.type === 'customer' || !ms.type;
         marker.className = `node-marker ${isCustomer ? 'customer' : 'internal'}`;
         marker.setAttribute('data-name', `${ms.name} (${ms.date.slice(5)})`);
         marker.style.left = `${msOffsetDays * cellWidth}px`;
         marker.style.top = '50%';
         rowEl.appendChild(marker);
-        
-        // 节点名字直接显示
-        const label = document.createElement('div');
-        label.className = `node-label ${isCustomer ? 'customer' : 'internal'}`;
-        label.textContent = ms.name;
-        label.style.left = `${msOffsetDays * cellWidth}px`;
-        label.style.top = 'calc(50% + 12px)';
-        rowEl.appendChild(label);
       }
     });
 
@@ -587,9 +771,10 @@ function render() {
 
   // 左侧高亮
   document.querySelectorAll('.task-item').forEach(el => {
-    el.addEventListener('click', () => {
-      document.querySelectorAll('.task-item').forEach(e => e.classList.remove('active'));
-      document.querySelectorAll('.task-row').forEach(e => e.classList.remove('active'));
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.move-btn')) return;
+      document.querySelectorAll('.task-item').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.task-row').forEach(x => x.classList.remove('active'));
       el.classList.add('active');
       const row = document.querySelector(`.task-row[data-id="${el.dataset.id}"]`);
       if (row) row.classList.add('active');
@@ -602,6 +787,30 @@ function render() {
   sidebarEl.addEventListener('scroll', () => { viewportEl.scrollTop = sidebarEl.scrollTop; });
   viewportEl.addEventListener('scroll', () => { sidebarEl.scrollTop = viewportEl.scrollTop; });
 }
+
+/* =========================================================
+   任务排序
+   ========================================================= */
+function moveTaskPriority(taskId, direction) {
+  const currentProj = getCurrentProject();
+  const tasks = currentProj.tasks;
+  const index = tasks.findIndex(t => t.id === taskId);
+  if (index === -1) return;
+  const targetIndex = index + direction;
+  if (targetIndex < 0 || targetIndex >= tasks.length) return;
+  const temp = tasks[index];
+  tasks[index] = tasks[targetIndex];
+  tasks[targetIndex] = temp;
+  render();
+  saveState();
+}
+
+document.getElementById('taskSidebar').addEventListener('click', (e) => {
+  const upBtn = e.target.closest('[data-act="move-task-up"]');
+  if (upBtn) { e.stopPropagation(); moveTaskPriority(upBtn.dataset.id, -1); return; }
+  const downBtn = e.target.closest('[data-act="move-task-down"]');
+  if (downBtn) { e.stopPropagation(); moveTaskPriority(downBtn.dataset.id, 1); return; }
+});
 
 /* =========================================================
    编辑弹窗
@@ -646,10 +855,7 @@ phaseList.addEventListener('click', (e) => {
     const items = phaseList.querySelectorAll('.phase-item');
     const clickedIndex = Array.from(items).indexOf(e.target.closest('.phase-item'));
     const arr = collectPhases();
-    if (clickedIndex >= 0) {
-      arr.splice(clickedIndex, 1);
-      renderPhases(arr);
-    }
+    if (clickedIndex >= 0) { arr.splice(clickedIndex, 1); renderPhases(arr); }
   }
 });
 document.getElementById('addPhaseBtn').onclick = () => {
@@ -692,10 +898,7 @@ milestoneList.addEventListener('click', (e) => {
     const items = milestoneList.querySelectorAll('.milestone-item');
     const clickedIndex = Array.from(items).indexOf(e.target.closest('.milestone-item'));
     const arr = collectMilestones();
-    if (clickedIndex >= 0) {
-      arr.splice(clickedIndex, 1);
-      renderMilestones(arr);
-    }
+    if (clickedIndex >= 0) { arr.splice(clickedIndex, 1); renderMilestones(arr); }
   }
 });
 document.getElementById('addMilestoneBtn').onclick = () => {
@@ -796,13 +999,16 @@ function openEditTask(id) {
 }
 
 /* =========================================================
-   项目与备份
+   项目选择与备份
    ========================================================= */
 const projectSelect = document.getElementById('projectSelect');
 function renderProjectSelect() {
   projectSelect.innerHTML = state.projects.map(p => `<option value="${p.id}" ${p.id === state.currentProjectId ? 'selected' : ''}>${esc(p.name)}</option>`).join('');
 }
-projectSelect.onchange = (e) => { state.currentProjectId = e.target.value; saveState(); render(); };
+projectSelect.onchange = (e) => {
+  state.currentProjectId = e.target.value;
+  saveState(); render();
+};
 document.getElementById('addProjectBtn').onclick = () => {
   const name = prompt('请输入新项目名称', '新项目');
   if (name === null) return;
@@ -811,15 +1017,55 @@ document.getElementById('addProjectBtn').onclick = () => {
   state.currentProjectId = newProj.id;
   saveState(); renderProjectSelect(); render();
 };
+
+/* =========================================================
+   设置弹窗
+   ========================================================= */
+const settingsOverlay = document.getElementById('settingsOverlay');
+document.getElementById('settingsBtn').onclick = () => settingsOverlay.classList.add('show');
+document.getElementById('settingsCloseBtn').onclick = () => settingsOverlay.classList.remove('show');
+settingsOverlay.addEventListener('click', e => { if (e.target === settingsOverlay) settingsOverlay.classList.remove('show'); });
+
+document.getElementById('exportBtn').onclick = () => {
+  const currentProj = getCurrentProject();
+  if (!currentProj) return alert('无数据');
+  let csv = `\uFEFF[${currentProj.name}] 任务名称,阶段名,阶段开始,阶段结束,负责人,进度,前置任务,节点名,节点日期,节点类型\n`;
+  currentProj.tasks.forEach(t => {
+    const preName = currentProj.tasks.find(x => x.id === t.dependencyId)?.name || '无';
+    const phaseStr = (t.phases || []).map(p => `${p.name || ''}(${p.start}~${p.end})`).join('; ');
+    const msStr = (t.milestones || []).map(m => `${m.name}(${m.date},${m.type})`).join('; ');
+    const clean = s => String(s || '').replace(/"/g, '""');
+    csv += [
+      `"${clean(t.name)}"`,
+      `"${clean(phaseStr)}"`,
+      `""`,
+      `""`,
+      `"${clean(t.owner)}"`,
+      `"${t.progress}%"`,
+      `"${clean(preName)}"`,
+      `"${clean(msStr)}"`,
+      `""`,
+      `""`
+    ].join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${currentProj.name}_排期_${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
 document.getElementById('backupBtn').onclick = () => {
   const dataStr = JSON.stringify(state, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `Empower项目排期_备份_${new Date().toISOString().slice(0,10)}.json`;
+  link.download = `Empower排期备份_${new Date().toISOString().slice(0,10)}.json`;
   link.click();
   URL.revokeObjectURL(link.href);
 };
+
 const importFileInput = document.getElementById('importFileInput');
 document.getElementById('importBtn').onclick = () => importFileInput.click();
 importFileInput.onchange = (e) => {
@@ -844,14 +1090,95 @@ importFileInput.onchange = (e) => {
   reader.readAsText(file);
   importFileInput.value = '';
 };
+
 document.getElementById('resetBtn').onclick = () => {
-  if (!confirm('确定清空所有数据并恢复示例吗？')) return;
+  const answer = prompt(
+    '⚠️ 重置会清空所有项目数据，且不可恢复。\n\n' +
+    '如果确定要重置，请手动输入以下文字：\n' +
+    '我知道重置会把所有内容清空'
+  );
+  if (answer !== '我知道重置会把所有内容清空') {
+    if (answer !== null) alert('❌ 输入不正确，重置已取消。');
+    return;
+  }
   state = defaultData();
   state.currentProjectId = state.projects[0].id;
-  renderProjectSelect(); render(); saveState();
+  saveState();
+  renderProjectSelect();
+  render();
+  settingsOverlay.classList.remove('show');
+  alert('✅ 已重置。');
 };
-let resizeTimer;
-window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 200); });
+
+/* =========================================================
+   GitHub 同步 UI
+   ========================================================= */
+const syncOverlay = document.getElementById('syncOverlay');
+const ghTokenInput = document.getElementById('ghTokenInput');
+const ghGistInput = document.getElementById('ghGistInput');
+const autoSyncCheck = document.getElementById('autoSyncCheck');
+
+document.getElementById('syncBtn').onclick = () => {
+  ghTokenInput.value = ghToken;
+  ghGistInput.value = ghGistId;
+  autoSyncCheck.checked = autoSyncEnabled;
+  if (!ghToken || !ghGistId) {
+    setSyncStatus('ℹ️ 首次使用，请按下面的说明配置：\n1. 生成 GitHub Token（只需 gist 权限）\n2. 创建一个 Gist，文件名 plan.json，内容 {}\n3. 把 Token 和 Gist ID 填进来，点「保存配置」\n4. 点「推送」上传当前数据', 'info');
+  } else if (_lastSyncTime) {
+    setSyncStatus('✅ 上次同步：' + _lastSyncTime.toLocaleString(), 'ok');
+  } else {
+    setSyncStatus('ℹ️ 已配置。可点「测试连接」验证，或直接「推送」。', 'info');
+  }
+  syncOverlay.classList.add('show');
+};
+
+document.getElementById('syncCloseBtn').onclick = () => syncOverlay.classList.remove('show');
+syncOverlay.addEventListener('click', e => { if (e.target === syncOverlay) syncOverlay.classList.remove('show'); });
+
+document.getElementById('syncSaveConfigBtn').onclick = () => {
+  ghToken = ghTokenInput.value.trim();
+  ghGistId = ghGistInput.value.trim();
+  localStorage.setItem(GH_TOKEN_KEY, ghToken);
+  localStorage.setItem(GH_GIST_KEY, ghGistId);
+  setSyncStatus('✅ 配置已保存到本机。可点「测试连接」验证。', 'ok');
+};
+
+document.getElementById('testConnBtn').onclick = () => {
+  ghToken = ghTokenInput.value.trim();
+  ghGistId = ghGistInput.value.trim();
+  localStorage.setItem(GH_TOKEN_KEY, ghToken);
+  localStorage.setItem(GH_GIST_KEY, ghGistId);
+  testConnection();
+};
+
+autoSyncCheck.onchange = () => {
+  autoSyncEnabled = autoSyncCheck.checked;
+  localStorage.setItem(AUTO_SYNC_KEY, autoSyncEnabled ? '1' : '0');
+  if (autoSyncEnabled && ghToken && ghGistId) {
+    pushToCloud({ silent: true });
+  }
+};
+
+document.getElementById('syncPushBtn').onclick = () => {
+  ghToken = ghTokenInput.value.trim();
+  ghGistId = ghGistInput.value.trim();
+  localStorage.setItem(GH_TOKEN_KEY, ghToken);
+  localStorage.setItem(GH_GIST_KEY, ghGistId);
+  pushToCloud();
+};
+
+document.getElementById('syncPullBtn').onclick = () => {
+  ghToken = ghTokenInput.value.trim();
+  ghGistId = ghGistInput.value.trim();
+  localStorage.setItem(GH_TOKEN_KEY, ghToken);
+  localStorage.setItem(GH_GIST_KEY, ghGistId);
+  if (!confirm('拉取会用云端数据覆盖本地，确定吗？')) return;
+  pullFromCloud();
+};
+
+/* =========================================================
+   初始化
+   ========================================================= */
 renderProjectSelect();
 render();
 </script>
